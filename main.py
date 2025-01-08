@@ -14,4 +14,4 @@ db.init_app(app)
 
 if __name__ == '__main__':
     # Executa a aplicação Flask com o modo debug ativado e na porta 5002
-    app.run(debug=True, port=5002)
+    app.run()
