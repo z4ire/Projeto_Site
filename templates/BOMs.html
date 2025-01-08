@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        /* Estilo para o layout com flexbox */
+        .content {
+            display: flex;  /* Usa o flexbox para colocar a sidebar e a tabela lado a lado */
+            min-height: 100vh;  /* Garante que o layout ocupe pelo menos a altura da tela */
+        }
+
+        /* Estilo para o sidebar (barra lateral) */
+        .sidebar {
+            height: 100%;  /* A barra lateral ocupa toda a altura da tela */
+            position: fixed;  /* A posição é fixa, então fica visível durante o scroll */
+            top: 50;  /* Fica 50 abaixono topo da página */
+            left: 0;  /* Fica à esquerda da tela */
+            width: 250px;  /* A largura da barra lateral */
+            background-color: #faf8f8;  /* Cor de fundo clara */
+            padding: 20px;  /* Espaçamento interno */
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);  /* Sombra suave à direita da barra lateral */
+        }
+
+        /* Estilo para o conteúdo principal, onde a tabela ficará */
+        .main-content {
+            margin-left: 250px;  /* Deixa um espaço à esquerda para a sidebar */
+            padding: 20px;  /* Adiciona espaçamento interno */
+            flex: 1;  /* Faz a tabela ocupar o restante do espaço disponível */
+        }
+
+        /* Estilo para a tabela */
+        .table td, .table th {
+            vertical-align: middle; /* Alinha ao centro verticalmente */
+            text-align: center; /* Alinha o texto ao centro horizontalmente */
+        }
+
+        /* Largura fixa para a coluna 'Status' */
+        .status-column {
+            width: 150px; /* Altere o valor conforme necessário */
+            white-space: nowrap; /* Impede que o texto quebre */
+            overflow: hidden; /* Oculta texto extra, se necessário */
+            text-overflow: ellipsis; /* Adiciona '...' para textos que excedem o limite */
+        }
+
+        /* Adicionando estilo para os botões */
+        .button-container {
+            display: flex;
+            flex-direction: column; /* Alinha os botões verticalmente */
+            gap: 10px; /* Espaço entre os botões */
+        }
+    </style>
+</head>
+<body>
+    {% include 'menu.html' %}
+
+    <div class="content">
+        <div class="sidebar">
+            <h2>Filtros</h2>
+            <form method="GET" action="{{ url_for('BOM.lista_BOMs') }}">
+                <label for="versao">Versão:</label>
+                <input type="text" class="form-control" name="versao" value="{{ versao }}" placeholder="Digite a versão"><br><br>
+
+                <label for="status">Status:</label>
+                <input type="text" class="form-control" name="status" value="{{ status }}" placeholder="Digite o status"><br><br>
+
+                <label for="componente">Componente:</label>
+                <input type="text" class="form-control" name="componente" value="{{ componente }}" placeholder="Digite o componente"><br><br>
+
+                <div class="button-container">
+                    <button type="submit">Filtrar</button>
+                </div>
+
+                <div class="alerta-filtro" style="color: red; display: {% if versao or status or componente %}block{% else %}none{% endif %};">
+                    <div>
+                        {% if versao %}
+                            <strong>Versão:</strong> {{ versao }}<br>
+                        {% endif %}
+                        {% if status %}
+                            <strong>Status:</strong> {{ status }}<br>
+                        {% endif %}
+                        {% if componente %}
+                            <strong>Componente:</strong> {{ componente }}<br>
+                        {% endif %}
+                        <a href="{{ url_for('BOM.lista_BOMs') }}" class="btn-limpar">Limpar Filtros</a>
+                    </div>
+                </div>
+                
+            </form>
+        </div>
+
+        <div class="main-content">
+            <h1>Lista de BOMs</h1>
+
+            <table class="table-sm table table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col">Placa</th>
+                    <th scope="col">Versão</th>
+                    <th scope="col" class="status-column">Status</th>
+                    <th scope="col">Componente</th>
+                    <th scope="col">Descrição</th>
+                    <th scope="col">Quantidade</th>
+                    <th scope="col">Designator</th>
+                </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    {% for bom in dados %}
+                    <tr>
+                        <td>{{ bom.Placa }}</td>
+                        <td>{{ bom.Versao }}</td>
+                        <td>{{ bom.Status }}</td>
+                        <td>{{ bom.Componente }}</td>
+                        <td>{{ bom.Descricao }}</td>
+                        <td>{{ bom.Quantidade }}</td>
+                        <td>{{ bom.Designator }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

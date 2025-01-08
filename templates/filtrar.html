@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <!-- Define a codificação de caracteres como UTF-8 -->
+    <meta charset="UTF-8">
+    <!-- Define a viewport para garantir que o layout seja responsivo, ou seja, se ajuste bem em dispositivos móveis -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Define o título da página que aparece na aba do navegador -->
+    <title>Filtrar DataFrame</title>
+    <!-- Inclui o CSS do Bootstrap a partir de um CDN para estilizar os componentes da página -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilo para o sidebar (barra lateral) */
+        .sidebar {
+            height: 100%;  /* A barra lateral ocupa toda a altura da tela */
+            position: fixed;  /* A posição é fixa, então fica visível durante o scroll */
+            top: 0;  /* Fica no topo da página */
+            left: 0;  /* Fica à esquerda da tela */
+            width: 250px;  /* A largura da barra lateral */
+            background-color: #faf8f8;  /* Cor de fundo clara */
+            padding: 20px;  /* Espaçamento interno */
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);  /* Sombra suave à direita da barra lateral */
+        }
+        /* Estilo para a área de conteúdo */
+        .content {
+            margin-left: 270px;  /* Adiciona uma margem à esquerda para dar espaço à sidebar */
+            padding: 20px;  /* Espaçamento interno para o conteúdo */
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Sidebar de filtros -->
+    <div class="sidebar">
+        <h2>Filtros</h2>
+        <form method="GET" action="/filtrar">
+            <label for="versao">Versão:</label>
+            <input type="text" class="form-control" name="versao" value="{{ versao }}" placeholder="Digite a versão"><br><br>
+
+            <label for="status">Status:</label>
+            <input type="text" class="form-control" name="status" value="{{ status }}" placeholder="Digite o status"><br><br>
+
+            <label for="componente">Componente:</label>
+            <input type="text" class="form-control" name="componente" value="{{ componente }}" placeholder="Digite o componente"><br><br>
+
+            <button type="submit">Filtrar</button>
+        </form>
+
+</div>
+
+<!-- Conteúdo principal -->
+<div class="content">
+    <h1>Lista de BOMs</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Placa</th>
+                <th>Versão</th>
+                <th>Status</th>
+                <th>Componente</th>
+                <th>Descrição</th>
+                <th>Quantidade</th>
+                <th>Designator</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bom in dados %}
+            <tr>
+                <td>{{ bom.Placa }}</td>
+                <td>{{ bom.Versao }}</td>
+                <td>{{ bom.Status }}</td>
+                <td>{{ bom.Componente }}</td>
+                <td>{{ bom.Descricao }}</td>
+                <td>{{ bom.Quantidade }}</td>
+                <td>{{ bom.Designator }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
