@@ -19,9 +19,16 @@ Rota de BOMs
 @bp_BOM_route.route('/', methods=['GET'])
 
 def lista_BOMs():
+    placa = request.args.get('placa', '').strip()
     versao = request.args.get('versao', '').strip()
     status = request.args.get('status', '').strip()
     componente = request.args.get('componente', '').strip()
+
+    # Se os parâmetros forem passados com valores separados por vírgula, convertemos em listas
+    placas_filtro = placa.split(',') if placa else []
+    versoes_filtro = versao.split(',') if versao else []
+    status_filtro = status.split(',') if status else []
+    componentes_filtro = componente.split(',') if componente else []
 
      # Inicia a consulta base
     query = db.session.query(BOMs.Placa, 
@@ -36,23 +43,25 @@ def lista_BOMs():
     # Adiciona o join entre BOMs e Componentes com base no campo 'Componente'
     query = query.join(BOMs, BOMs.Componente == OITM.Codigo)
 
-    # Aplicar filtros dinâmicos se presentes
-    if status:
-        query = query.filter(BOMs.Status == status)
-    if componente:
-        query = query.filter(BOMs.Componente == componente)
-    if versao:
-        query = query.filter(BOMs.Versao == versao)
+        # Aplica filtros dinâmicos se presentes
+    if placas_filtro:
+        query = query.filter(BOMs.Placa.in_(placas_filtro))
+    if versoes_filtro:
+        query = query.filter(BOMs.Versao.in_(versoes_filtro))
+    if status_filtro:
+        query = query.filter(BOMs.Status.in_(status_filtro))
+    if componentes_filtro:
+        query = query.filter(BOMs.Componente.in_(componentes_filtro))
 
     # Executa a consulta
     resultados = query.all()
 
     return render_template('BOMs.html', 
                            dados=resultados,
+                           placa=placa,
                            versao=versao,
                            status=status,
                            componente=componente)
-
 
 @bp_BOM_route.route('/new', methods=['GET'])
 def form_cadastro_BOM():
