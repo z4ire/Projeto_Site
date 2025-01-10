@@ -4,9 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .content {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .form-container {
+            width: 45%;
+        }
+        .flash-messages {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #65ec9e;
+            color: #000000;
+            padding: 10px;
+            border: 1px solid #65ec9e;
+            border-radius: 5px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+    </style>
 </head>
 <body>
     {% include 'menu.html' %}
-    "Formulário de Cadastro de BOM"
+
+    <div class="content">
+        <!-- Formulário para envio de dados via Excel -->
+        <div class="form-container">
+            <p>O arquivo Excel deve conter apenas uma aba e as seguintes colunas: 'Placa', 'Versao', 'Status', 'Componente', 'Quantidade', 'Designator'.</p>
+            <form method="POST" action="{{ url_for('BOM.add_BOMs') }}" enctype="multipart/form-data">
+                <label for="file">Selecione um arquivo Excel:</label>
+                <input type="file" name="file" id="file" accept=".xlsx">
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+
+        <!-- Formulário para envio manual de dados -->
+        <div class="form-container">
+            <p>Preencha os dados do novo BOM:</p>
+            <form method="POST" action="{{ url_for('BOM.add_BOMs') }}">
+                <label for="new_placa">Placa:</label>
+                <input type="text" name="new_placa" required><br>
+
+                <label for="new_versao">Versão:</label>
+                <input type="text" name="new_versao" required><br>
+
+                <label for="new_status">Status:</label>
+                <input type="text" name="new_status" required><br>
+
+                <label for="new_componente">Componente:</label>
+                <input type="text" name="new_componente" required><br>
+
+                <label for="new_quantidade">Quantidade:</label>
+                <input type="number" name="new_quantidade" required><br>
+
+                <label for="new_designator">Designador:</label>
+                <input type="text" name="new_designator" required><br>
+
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exibindo as mensagens flash -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="flash-messages">
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    {% endwith %}
 </body>
 </html>

@@ -1,4 +1,5 @@
-from flask import Blueprint, request, render_template
+import pandas as pd
+from flask import Blueprint, request, render_template, redirect, flash
 from database.models.database_class import db, BOMs, OITM
 
 bp_BOM_route = Blueprint("BOM", __name__)
@@ -67,6 +68,72 @@ def lista_BOMs():
                            versao=versao,
                            status=status,
                            componente=componente)
+
+@bp_BOM_route.route('/new', methods=['POST'])
+ 
+@bp_BOM_route.route('/new', methods=['POST'])
+def add_BOMs():
+    # Verifica se a requisição contém um arquivo (Excel)
+    file = request.files.get('file')
+    if file and file.filename.endswith('.xlsx'):  # Caso o arquivo seja Excel
+        try:
+            # Lê o arquivo Excel diretamente da memória com pandas
+            data = pd.read_excel(file)
+            data = data.dropna(how='all')  # Remove linhas vazias
+            print("Data from Excel:", data)
+            
+            # Itera pelas linhas do DataFrame e adiciona ao banco de dados
+            for _, row in data.iterrows():
+                new_BOM = BOMs(
+                    ID=f"{row['Placa']}{row['Versao']}{row['Status']}{row['Componente']}{row['Quantidade']}{row['Designator']}",
+                    Placa=row['Placa'],
+                    Versao=row['Versao'],
+                    Status=row['Status'],
+                    Componente=row['Componente'],
+                    Quantidade=row['Quantidade'],
+                    Designator=row['Designator']
+                )
+                db.session.add(new_BOM)
+
+            db.session.commit()
+            flash('Dados carregados com sucesso.')
+        except Exception as e:
+            db.session.rollback()  # Reverte em caso de erro
+            flash(f'Ocorreu um erro ao processar o arquivo: {str(e)}', 'error')
+            print(f"Erro ao processar o arquivo: {str(e)}")
+    else:  # Caso o formulário manual seja enviado
+        # Obtém os dados do formulário
+        new_placa = request.form.get('new_placa', '').strip()
+        new_versao = request.form.get('new_versao', '').strip()
+        new_status = request.form.get('new_status', '').strip()
+        new_componente = request.form.get('new_componente', '').strip()
+        new_quantidade = request.form.get('new_quantidade', '').strip()
+        new_designator = request.form.get('new_designator', '').strip()
+
+        # Verifica se os campos obrigatórios estão preenchidos
+        if not new_placa or not new_versao or not new_status or not new_componente or not new_quantidade or not new_designator:
+            flash('Por favor, preencha todos os campos obrigatórios.')
+            return render_template('formulario_cadastro_BOM.html')
+
+        # Cria o novo BOM a partir dos dados do formulário
+        new_BOM = BOMs(
+            ID=f"{new_placa}{new_versao}{new_status}{new_componente}{new_quantidade}{new_designator}",
+            Placa=new_placa,
+            Versao=new_versao,
+            Status=new_status,
+            Componente=new_componente,
+            Quantidade=new_quantidade,
+            Designator=new_designator
+        )
+        
+        # Adiciona o novo BOM ao banco de dados
+        db.session.add(new_BOM)
+        db.session.commit()
+        flash('Dados carregados com sucesso.')
+
+    return render_template('formulario_cadastro_BOM.html')
+
+
 
 @bp_BOM_route.route('/new', methods=['GET'])
 def form_cadastro_BOM():

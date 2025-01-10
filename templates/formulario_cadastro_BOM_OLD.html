@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% include 'menu.html' %}
+    Adiciona linha por linha (por enquanto)
+
+        <div class="content">
+            <div class="sidebar">
+                <form method="POST" action="{{ url_for('BOM.add_BOMs') }}">
+
+                    <label for="placa">Placa:</label>
+                    <input type="text" class="form-control" name="new_placa" value="{{ new_placa }}" placeholder="Digite a placa"><br><br>
+
+                    <label for="componente">Componente:</label>
+                    <input type="text" class="form-control" name="new_componente" value="{{ new_componente }}" placeholder="Digite o componente"><br><br>
+
+                    <label for="versao">Versão:</label>
+                    <input type="text" class="form-control" name="new_versao" value="{{ new_versao }}" placeholder="Digite a versão"><br><br>
+
+                    <label for="status">Status:</label>
+                    <input type="text" class="form-control" name="new_status" value="{{ new_status }}" placeholder="Digite o status"><br><br>
+
+                    <label for="quantidade">quantidade:</label>
+                    <input type="number" class="form-control" name="new_quantidade" value="{{ new_quantidade }}" placeholder="Digite a quantidade"><br><br>
+
+                    <label for="designator">Designator:</label>
+                    <input type="text" class="form-control" name="new_designator" value="{{ new_designator }}" placeholder="Digite o designator"><br><br>
+                    <button type="submit">Adiciona Linha</button>
+                    <a href="#menu" id="menu-button">
+                        Voltar ao topo
+                    </a>
+                    
+                </form>
+            </div>
+        </div>   
+</body> 
+</html>

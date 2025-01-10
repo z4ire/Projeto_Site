@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 app.register_blueprint(bp_home_route)
 app.register_blueprint(bp_BOM_route, url_prefix = '/BOMs')
+app.secret_key = 'apppadtec'
 
 db.init_app(app)
 
