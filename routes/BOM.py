@@ -42,10 +42,14 @@ def lista_BOMs():
 
     # Adiciona o join entre BOMs e Componentes com base no campo 'Componente'
     query = query.join(BOMs, BOMs.Componente == OITM.Codigo)
+    resultados_placas = []
 
         # Aplica filtros dinâmicos se presentes
     if placas_filtro:
         query = query.filter(BOMs.Placa.in_(placas_filtro))
+        placas_descricao = db.session.query(OITM.Codigo, OITM.Descricao).filter(OITM.Codigo.in_(placas_filtro))
+        resultados_placas = placas_descricao.all()
+
     if versoes_filtro:
         query = query.filter(BOMs.Versao.in_(versoes_filtro))
     if status_filtro:
@@ -58,6 +62,7 @@ def lista_BOMs():
 
     return render_template('BOMs.html', 
                            dados=resultados,
+                           dados_placa = resultados_placas,
                            placa=placa,
                            versao=versao,
                            status=status,

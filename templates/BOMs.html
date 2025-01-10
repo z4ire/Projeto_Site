@@ -105,9 +105,6 @@
 
                     <div style="color: red;">
                         <div>
-                            {% if placa %}
-                                <strong>Placa:</strong> {{ placa }}<br>
-                            {% endif %}
                             {% if versao %}
                                 <strong>Versão:</strong> {{ versao }}<br>
                             {% endif %}
@@ -128,8 +125,22 @@
                 </form>
             </div>
 
+
             <div class="main-content">
 
+                <table style="margin-left: auto; margin-right: 0; color: red; text-align: center;" class="table-bordered">
+                    <thead>
+                    </thead>
+                    <tbody>
+                        {% for placa in dados_placa %}
+                        <tr>
+                            <td style="width: 150px;"><strong>{{ placa.Codigo }}</strong></td>
+                            <td style="width: 600px;"><strong>{{ placa.Descricao }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px;"></div>
                 <table class="table-sm table table-bordered">
                     <thead>
                     <tr>
