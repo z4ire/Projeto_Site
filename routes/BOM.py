@@ -43,13 +43,13 @@ def lista_BOMs():
 
     # Adiciona o join entre BOMs e Componentes com base no campo 'Componente'
     query = query.join(BOMs, BOMs.Componente == OITM.Codigo)
-    resultados_placas = []
 
-        # Aplica filtros dinâmicos se presentes
     if placas_filtro:
         query = query.filter(BOMs.Placa.in_(placas_filtro))
         placas_descricao = db.session.query(OITM.Codigo, OITM.Descricao).filter(OITM.Codigo.in_(placas_filtro))
         resultados_placas = placas_descricao.all()
+    else:
+        resultados_placas = []
 
     if versoes_filtro:
         query = query.filter(BOMs.Versao.in_(versoes_filtro))
@@ -57,6 +57,9 @@ def lista_BOMs():
         query = query.filter(BOMs.Status.in_(status_filtro))
     if componentes_filtro:
         query = query.filter(BOMs.Componente.in_(componentes_filtro))
+
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 100, type=int)
 
     # Executa a consulta
     resultados = query.all()
@@ -101,6 +104,7 @@ def add_BOMs():
             db.session.rollback()  # Reverte em caso de erro
             flash(f'Ocorreu um erro ao processar o arquivo: {str(e)}', 'error')
             print(f"Erro ao processar o arquivo: {str(e)}")
+
     else:  # Caso o formulário manual seja enviado
         # Obtém os dados do formulário
         new_placa = request.form.get('new_placa', '').strip()

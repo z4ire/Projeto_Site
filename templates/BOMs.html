@@ -155,20 +155,25 @@
                     </tr>
                     </thead>
                     <tbody class="table-group-divider">
-                        {% for bom in dados %}
-                        <tr>
-                            <td>{{ bom.Placa }}</td>
-                            <td>{{ bom.Versao }}</td>
-                            <td>{{ bom.Status }}</td>
-                            <td>{{ bom.Componente }}</td>
-                            <td>{{ bom.Descricao }}</td>
-                            <td>{{ bom.Quantidade }}</td>
-                            <td>{{ bom.Designator }}</td>
-                        </tr>
-                        {% endfor %}
+                        {% if dados_placa or versao or status or componente %}
+                            {% for bom in dados %}
+                            <tr>
+                                <td>{{ bom.Placa }}</td>
+                                <td>{{ bom.Versao }}</td>
+                                <td>{{ bom.Status }}</td>
+                                <td>{{ bom.Componente }}</td>
+                                <td>{{ bom.Descricao }}</td>
+                                <td>{{ bom.Quantidade }}</td>
+                                <td>{{ bom.Designator }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
+            
         </div>
+
+        
     </body>
     </html>
