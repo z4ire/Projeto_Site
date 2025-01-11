@@ -1,0 +1,10 @@
+{
+    "sqlite3-editor.ui.conditionalFormatting": [
+        {
+            "database": "BOMs.db",
+            "table": "PNs_SQL",
+            "column": "CONCAT",
+            "startsWith": "8.800.22.0"
+        }
+    ]
+}

@@ -66,7 +66,7 @@
 
             /* Largura fixa para a coluna 'Status' */
             .status-column {
-                width: 150px; /* Altere o valor conforme necessário */
+                width: 110px; /* Altere o valor conforme necessário */
                 white-space: nowrap; /* Impede que o texto quebre */
                 overflow: hidden; /* Oculta texto extra, se necessário */
                 text-overflow: ellipsis; /* Adiciona '...' para textos que excedem o limite */
@@ -152,6 +152,9 @@
                         <th scope="col">Descrição</th>
                         <th scope="col">Quantidade</th>
                         <th scope="col">Designator</th>
+                        <th scope="col">Fabricante</th>
+                        <th scope="col">PN</th>
+                        <th scope="col">Status</th>
                     </tr>
                     </thead>
                     <tbody class="table-group-divider">
@@ -164,7 +167,10 @@
                                 <td>{{ bom.Componente }}</td>
                                 <td>{{ bom.Descricao }}</td>
                                 <td>{{ bom.Quantidade }}</td>
-                                <td>{{ bom.Designator }}</td>
+                                <td>{{ bom.Designator|truncate(10) }}</td>
+                                <td>{{ bom.Fabricante }}</td>
+                                <td>{{ bom.PN }}</td>
+                                <td>{{ bom.Status_PN }}</td>
                             </tr>
                             {% endfor %}
                         {% endif %}

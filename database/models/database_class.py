@@ -18,3 +18,11 @@ class OITM(db.Model):
     Codigo = db.Column(db.String(20), primary_key=True)
     Descricao = db.Column(db.String(100))
     Ativo = db.Column(db.String(10))
+
+class PNs(db.Model):
+    __tablename__ = 'PNs_SQL'
+    Codigo_PN = db.Column(db.String(20))
+    Fabricante = db.Column(db.String(50))
+    PN = db.Column(db.String(50))
+    Status_PN = db.Column(db.String(25))
+    CONCAT = db.Column(db.String(100), primary_key=True)

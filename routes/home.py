@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, render_template
 
 bp_home_route = Blueprint("home", __name__)
 

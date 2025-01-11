@@ -36,7 +36,7 @@
             <p>O arquivo Excel deve conter apenas uma aba e as seguintes colunas: 'Placa', 'Versao', 'Status', 'Componente', 'Quantidade', 'Designator'.</p>
             <form method="POST" action="{{ url_for('BOM.add_BOMs') }}" enctype="multipart/form-data">
                 <label for="file">Selecione um arquivo Excel:</label>
-                <input type="file" name="file" id="file" accept=".xlsx">
+                <input type="file" name="file" id="file" accept=".xlsx" required>
                 <button type="submit">Enviar</button>
             </form>
         </div>
