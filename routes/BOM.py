@@ -64,6 +64,8 @@ def lista_BOMs():
     if componentes_filtro:
         query = query.filter(BOMs.Componente.in_(componentes_filtro))
 
+    query = query.order_by(BOMs.Placa.desc(), BOMs.Versao.desc())
+
     if (placa or versao or status or componente):
     # Executa a consulta
         resultados = query.all()
