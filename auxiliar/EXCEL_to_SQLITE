@@ -27,7 +27,7 @@ def salvar_no_sqlite(df):
     conn.close()
 
 # Caminho do arquivo Excel
-caminho_arquivo_excel = r'C:\Users\zcouto\OneDrive - Padtec\Documents\Projeto_Site\6.800.10.874.xlsx'
+caminho_arquivo_excel = r'C:\Users\zcouto\OneDrive - Padtec\Documents\Projeto_Site\auxiliar\6.800.10.874.xlsx'
 
 # Carregar dados do Excel
 df = carregar_dados_excel(caminho_arquivo_excel)
