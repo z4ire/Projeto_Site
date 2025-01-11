@@ -64,11 +64,11 @@ def lista_BOMs():
     if componentes_filtro:
         query = query.filter(BOMs.Componente.in_(componentes_filtro))
 
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 100, type=int)
-
+    if (placa or versao or status or componente):
     # Executa a consulta
-    resultados = query.all()
+        resultados = query.all()
+    else:
+        resultados =[]
 
     return render_template('BOMs.html', 
                            dados=resultados,

@@ -158,8 +158,7 @@
                     </tr>
                     </thead>
                     <tbody class="table-group-divider">
-                        {% if dados_placa or versao or status or componente %}
-                            {% for bom in dados %}
+                        {% for bom in dados %}
                             <tr>
                                 <td>{{ bom.Placa }}</td>
                                 <td>{{ bom.Versao }}</td>
@@ -172,8 +171,7 @@
                                 <td>{{ bom.PN }}</td>
                                 <td>{{ bom.Status_PN }}</td>
                             </tr>
-                            {% endfor %}
-                        {% endif %}
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
