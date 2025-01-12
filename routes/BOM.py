@@ -32,7 +32,8 @@ def lista_BOMs():
     componentes_filtro = componente.split(',') if componente else []
 
      # Inicia a consulta base
-    query = db.session.query(BOMs.Placa, 
+    query = db.session.query(BOMs.ID,
+        BOMs.Placa, 
         BOMs.Versao, 
         BOMs.Status, 
         BOMs.Componente, 
@@ -72,8 +73,17 @@ def lista_BOMs():
     else:
         resultados =[]
 
+    agrupados = {}
+
+    dados_agrupados = {}
+    for bom in resultados:
+        chave = bom.ID  # Tupla com Placa, Versão e Componente
+        if chave not in dados_agrupados:
+            dados_agrupados[chave] = []
+        dados_agrupados[chave].append(bom)
+
     return render_template('BOMs.html', 
-                           dados=resultados,
+                           dados_agrupados=dados_agrupados,
                            dados_placa = resultados_placas,
                            placa=placa,
                            versao=versao,

@@ -5,7 +5,7 @@ db = SQLAlchemy()
 
 class BOMs(db.Model):
     __tablename__ = 'BOMs_Placas'
-    ID = db.Column(db.String(20), primary_key=True)
+    ID = db.Column(db.String(50), primary_key=True)
     Placa = db.Column(db.String(20))
     Versao = db.Column(db.String(4))
     Status = db.Column(db.String(100))

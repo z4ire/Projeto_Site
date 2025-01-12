@@ -144,35 +144,58 @@
                 
                 <table class="table-sm table table-bordered">
                     <thead>
-                    <tr>
-                        <th scope="col">Placa</th>
-                        <th scope="col">Versão</th> 
-                        <th scope="col" class="status-column">Status</th>
-                        <th scope="col">Componente</th>
-                        <th scope="col">Descrição</th>
-                        <th scope="col">Quantidade</th>
-                        <th scope="col">Designator</th>
-                        <th scope="col">Fabricante</th>
-                        <th scope="col">PN</th>
-                        <th scope="col">Status</th>
-                    </tr>
+                        <tr>
+                            <th scope="col">Placa</th>
+                            <th scope="col">Versão</th>
+                            <th scope="col" class="status-column">Status</th>
+                            <th scope="col">Componente</th>
+                            <th scope="col">Descrição</th>
+                            <th scope="col">Quantidade</th>
+                            <th scope="col">Designator</th>
+                            <th scope="col">Fabricante</th>
+                            <th scope="col">PN</th>
+                            <th scope="col">Status</th>
+                        </tr>
                     </thead>
                     <tbody class="table-group-divider">
-                        {% for bom in dados %}
+                        {% for componente, itens in dados_agrupados.items() %}
                             <tr>
-                                <td>{{ bom.Placa }}</td>
-                                <td>{{ bom.Versao }}</td>
-                                <td>{{ bom.Status }}</td>
-                                <td>{{ bom.Componente }}</td>
-                                <td>{{ bom.Descricao }}</td>
-                                <td>{{ bom.Quantidade }}</td>
-                                <td>{{ bom.Designator|truncate(10) }}</td>
-                                <td>{{ bom.Fabricante }}</td>
-                                <td>{{ bom.PN }}</td>
-                                <td>{{ bom.Status_PN }}</td>
+                                <td>{{ itens[0].Placa }}</td>
+                                <td>{{ itens[0].Versao }}</td>
+                                <td rowspan="{{ itens|length }}">
+                                    {{ itens[0].Status }}
+                                </td>
+                                <!-- Agrupando Componente -->
+                                <td rowspan="{{ itens|length }}">
+                                    {{ itens[0].Componente }}
+                                </td>
+                                <!-- Agrupando Descrição -->
+                                <td rowspan="{{ itens|length }}">
+                                    {{ itens[0].Descricao }}
+                                </td>
+                                <!-- Agrupando Quantidade -->
+                                <td rowspan="{{ itens|length }}">
+                                    {{ itens[0].Quantidade }}
+                                </td>
+                                <!-- Agrupando Designator -->
+                                <td rowspan="{{ itens|length }}">
+                                    {{ itens[0].Designator|truncate(10) }}
+                                </td>
+                                <td>{{ itens[0].Fabricante }}</td>
+                                <td>{{ itens[0].PN }}</td>
+                                <td>{{ itens[0].Status_PN }}</td>
                             </tr>
+                            {% for bom in itens[1:] %}
+                                <tr>
+                                    <td>{{ bom.Placa }}</td>
+                                    <td>{{ bom.Versao }}</td>   
+                                    <td>{{ bom.Fabricante }}</td>
+                                    <td>{{ bom.PN }}</td>
+                                    <td>{{ bom.Status_PN }}</td>
+                                </tr>
+                            {% endfor %}
                         {% endfor %}
-                    </tbody>                   
+                    </tbody>
                 </table>
             </div>
             
