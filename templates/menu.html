@@ -21,16 +21,19 @@
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{{ url_for('BOM.lista_BOMs') }}">BOMs</a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('BOM.alternativos_BOM') }}">Alternativos</a>
+              </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Demanda
+                  Edição
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="{{ url_for('BOM.form_cadastro_BOM') }}">Adicionar BOM</a></li>
                   <li><a class="dropdown-item" href="{{ url_for('BOM.form_edit_BOM') }}">Editar BOM</a></li>
                   <li><a class="dropdown-item" href="{{ url_for('BOM.form_cadastro_BOM') }}">Excluir BOM</a></li>
                   <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item" href="#">ECO</a></li>
+                  <li><a class="dropdown-item" href="#">Evolução</a></li>
                 </ul>
               </li>
               <li class="nav-item">

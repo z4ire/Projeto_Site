@@ -1,0 +1,157 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+
+        <style>
+            /* Estilo para o layout com flexbox */
+            .content {
+                display: flex;  /* Usa o flexbox para colocar a sidebar e a tabela lado a lado */
+                min-height: 100vh;  /* Garante que o layout ocupe pelo menos a altura da tela */
+            }
+            
+            /* Estilos para o botão de menu */
+            /* Estilos para o botão de menu flutuante */
+            #menu-button {
+                position: fixed;  /* Fixa o botão na tela */
+                bottom: 20px;     /* Distância do fundo da tela */
+                right: 20px;      /* Distância da lateral direita */
+                padding: 12px 25px;  /* Adiciona preenchimento confortável */
+                background-color: #007bff;  /* Cor de fundo azul */
+                color: white;  /* Cor do texto */
+                text-decoration: none;  /* Remove o sublinhado */
+                font-weight: bold;  /* Deixa o texto mais forte */
+                border-radius: 50px;  /* Bordas arredondadas para um estilo mais moderno */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Adiciona sombra suave */
+                transition: background-color 0.3s ease, transform 0.2s ease;  /* Animações suaves */
+                z-index: 1000;  /* Garante que o botão fique acima de outros elementos */
+            }
+
+            #menu-button:hover {
+                background-color: #0056b3;  /* Cor de fundo mais escura ao passar o mouse */
+                transform: translateY(-4px);  /* Leve elevação do botão */
+            }
+
+            #menu-button:active {
+                background-color: #003f7f;  /* Cor mais escura ao clicar */
+                transform: translateY(0);  /* Retorna à posição original */
+            }
+
+            /* Estilo para o sidebar (barra lateral) */
+            .sidebar {
+                height: 100%;  /* A barra lateral ocupa toda a altura da tela */
+                position: fixed;  /* A posição é fixa, então fica visível durante o scroll */
+                top: 50;  /* Fica 50 abaixono topo da página */
+                left: 0;  /* Fica à esquerda da tela */
+                width: 250px;  /* A largura da barra lateral */
+                background-color: #faf8f8;  /* Cor de fundo clara */
+                padding: 20px;  /* Espaçamento interno */
+                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);  /* Sombra suave à direita da barra lateral */
+            }
+
+            /* Estilo para o conteúdo principal, onde a tabela ficará */
+            .main-content {
+                margin-left: 250px;  /* Deixa um espaço à esquerda para a sidebar */
+                padding: 20px;  /* Adiciona espaçamento interno */
+                flex: 1;  /* Faz a tabela ocupar o restante do espaço disponível */
+            }
+
+            /* Estilo para a tabela */
+            .table td, .table th {
+                vertical-align: middle; /* Alinha ao centro verticalmente */
+                text-align: center; /* Alinha o texto ao centro horizontalmente */
+            }
+
+            /* Largura fixa para a coluna 'Status' */
+            .status-column {
+                width: 110px; /* Altere o valor conforme necessário */
+                white-space: nowrap; /* Impede que o texto quebre */
+                overflow: hidden; /* Oculta texto extra, se necessário */
+                text-overflow: ellipsis; /* Adiciona '...' para textos que excedem o limite */
+            }
+
+            /* Adicionando estilo para os botões */
+            .button-container {
+                display: flex;
+                flex-direction: column; /* Alinha os botões verticalmente */
+                gap: 10px; /* Espaço entre os botões */
+            }
+        </style>
+    </head>
+    <body>
+        {% include 'menu.html' %}
+
+        <div class="content">
+            <div class="sidebar">
+                <form method="GET" action="{{ url_for('BOM.alternativos_BOM') }}">
+
+                    <label for="placa">Placa:</label>
+                    <input type="text" class="form-control" name="placa" value="{{ placa }}" placeholder="Digite a placa"><br><br>
+
+                    <div class="button-container">
+                        <button type="submit">Filtrar</button>
+                    </div>
+
+                    <div style="color: red;">
+                        <div>
+
+                            <a href="{{ url_for('BOM.alternativos_BOM') }}" class="btn-limpar">Limpar Filtros</a>
+                        </div>
+                    </div>
+
+                    <a href="#menu" id="menu-button">
+                        Voltar ao topo
+                    </a>
+                    
+                </form>
+            </div>
+            <div class="main-content">
+
+                <table style="margin-left: auto; margin-right: 0; color: red; text-align: center;" class="table-bordered">
+                    <thead>
+                    </thead>
+                    <tbody>
+                        {% for placa in dados_placa %}
+                        <tr>
+                            <td style="width: 150px;"><strong>{{ placa.Codigo }}</strong></td>
+                            <td style="width: 600px;"><strong>{{ placa.Descricao }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px;"></div>
+                
+                <table class="table-sm table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Principal</th>
+                            <th scope="col">Alternativo</th>
+                            <th scope="col">Fabricante</th>
+                            <th scope="col">PN</th>
+                            <th scope="col">Status</th>
+
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for componente in dados %}
+                            <tr>
+                                <td>{{ componente.Comp_Princ }}</td>
+                                <td>{{ componente.Comp_Alt }}</td>
+                                <td>{{ componente.Fabricante }}</td>
+                                <td>{{ componente.PN }}</td>
+                                <td>{{ componente.Status_PN }}</td>
+
+
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+
+        
+    </body>
+    </html>

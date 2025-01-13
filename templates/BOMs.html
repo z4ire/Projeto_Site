@@ -161,7 +161,9 @@
                         {% for componente, itens in dados_agrupados.items() %}
                             <tr>
                                 <td>{{ itens[0].Placa }}</td>
-                                <td>{{ itens[0].Versao }}</td>
+                                <td rowspan="{{ itens|length }}">
+                                    {{ itens[0].Versao }}
+                                </td>
                                 <td rowspan="{{ itens|length }}">
                                     {{ itens[0].Status }}
                                 </td>
@@ -188,7 +190,6 @@
                             {% for bom in itens[1:] %}
                                 <tr>
                                     <td>{{ bom.Placa }}</td>
-                                    <td>{{ bom.Versao }}</td>   
                                     <td>{{ bom.Fabricante }}</td>
                                     <td>{{ bom.PN }}</td>
                                     <td>{{ bom.Status_PN }}</td>

@@ -1,0 +1,36 @@
+import pandas as pd
+import sqlite3
+
+# Função para carregar dados do Excel
+def carregar_dados_excel(caminho_arquivo):
+    # Carregar a planilha do Excel em um DataFrame
+    df = pd.read_excel(caminho_arquivo)
+    return df
+
+# Função para salvar no banco de dados SQLite (apagando dados anteriores)
+def salvar_no_sqlite(df):
+    # Conectar ao banco de dados SQLite
+    conn = sqlite3.connect(r'C:\Users\zcouto\OneDrive - Padtec\Documents\Projeto_Site\instance\BOMs.db')
+    cursor = conn.cursor()
+
+    # Apagar os dados existentes na tabela
+    cursor.execute("DELETE FROM BOMs_Placas")
+    
+    # Inserir os novos dados na tabela
+    for index, row in df.iterrows():
+        # Criar a consulta para inserir os dados
+        query = "INSERT INTO BOMs_Placas (ID, Placa, Versao, Status, Componente, Quantidade, Designator) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        cursor.execute(query, tuple(row))  # Garantir que os dados estão na ordem certa
+
+    # Commit e fechamento da conexão
+    conn.commit()
+    conn.close()
+
+# Caminho do arquivo Excel
+caminho_arquivo_excel = r'C:\Users\zcouto\OneDrive - Padtec\Documents\Projeto_Site\auxiliar\6.800.10.874.xlsx'
+
+# Carregar dados do Excel
+df = carregar_dados_excel(caminho_arquivo_excel)
+
+# Salvar os dados no SQLite
+salvar_no_sqlite(df)

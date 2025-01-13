@@ -26,3 +26,12 @@ class PNs(db.Model):
     PN = db.Column(db.String(50))
     Status_PN = db.Column(db.String(25))
     CONCAT = db.Column(db.String(100), primary_key=True)
+
+class ALT(db.Model):
+    __tablename__ = 'ALTERNATIVOS_SAP'
+    Placa_ALT = db.Column(db.String(20))
+    Comp_Princ = db.Column(db.String(20))
+    Comp_Alt = db.Column(db.String(20))
+    CONCAT = db.Column(db.String(100), primary_key=True)
+
+

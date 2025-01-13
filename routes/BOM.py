@@ -1,6 +1,6 @@
 import pandas as pd
 from flask import Blueprint, request, render_template, redirect, flash, url_for
-from database.models.database_class import db, BOMs, OITM, PNs
+from database.models.database_class import db, BOMs, OITM, PNs, ALT
 
 bp_BOM_route = Blueprint("BOM", __name__)
 
@@ -48,7 +48,7 @@ def lista_BOMs():
     # Adiciona o join entre BOMs e Componentes com base no campo 'Componente'
     query = query.join(OITM, BOMs.Componente == OITM.Codigo)
 
-# Adiciona o join entre BOMs e PNs com base no campo 'Componente' e 'Codigo_PN'
+    # Adiciona o join entre BOMs e PNs com base no campo 'Componente' e 'Codigo_PN'
     query = query.join(PNs, BOMs.Componente == PNs.Codigo_PN)
 
     if placas_filtro:
@@ -152,10 +152,45 @@ def form_cadastro_BOM():
     "Formulário para cadastrar uma BOM"
     return render_template('formulario_cadastro_BOM.html')
 
-@bp_BOM_route.route('/', methods=['GET'])
-def detalhes_BOM(codigo_BOM):
-    "Exibe detalhes da BOM"
-    return render_template('detalhes_BOM.html')
+@bp_BOM_route.route('/alt', methods=['GET'])
+def alternativos_BOM():
+
+    placa = request.args.get('placa', '').strip()
+
+    query = db.session.query(
+        OITM.Codigo,
+        ALT.Placa_ALT,
+        ALT.Comp_Princ,
+        ALT.Comp_Alt,
+        PNs.Fabricante,
+        PNs.PN,
+        PNs.Status_PN
+    )  # Seleciona as duas tabelas
+
+    query = query.join(OITM, OITM.Codigo == ALT.Placa_ALT)
+    query = query.join(PNs, PNs.Codigo_PN == ALT.Comp_Alt)
+
+    resultados =[]   
+    if placa:
+        query = query.filter(OITM.Codigo==placa)
+        placas_descricao = db.session.query(OITM.Codigo, OITM.Descricao).filter(OITM.Codigo==placa)
+        resultados_placas = placas_descricao.all()
+    else:
+        resultados_placas = []
+
+    query = query.order_by(ALT.Comp_Princ.desc())
+
+    print(str(query))
+
+
+    if placa:
+        resultados = query.all()
+    else:
+        resultados =[]
+
+    print(resultados)
+
+    return render_template('Alt.html', dados=resultados, dados_placa = resultados_placas)
 
 @bp_BOM_route.route('/edit', methods=['GET'])
 def form_edit_BOM():
