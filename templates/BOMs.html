@@ -135,7 +135,9 @@
                         {% for placa in dados_placa %}
                         <tr>
                             <td style="width: 150px;"><strong>{{ placa.Codigo }}</strong></td>
-                            <td style="width: 600px;"><strong>{{ placa.Descricao }}</strong></td>
+                            <td style="width: 500px;"><strong>{{ placa.Descricao }}</strong></td>
+                            <td style="width: 80px;">{{ placa.Link | safe }}</td>
+                            <td style="width: 80px;">{{ placa.baixar | safe }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

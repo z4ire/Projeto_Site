@@ -1,38 +1,27 @@
 import pandas as pd
-from flask import Blueprint, request, render_template, redirect, flash, url_for
+from io import BytesIO
+from flask import Blueprint, request, render_template, redirect, flash, url_for, Response
 from database.models.database_class import db, BOMs, OITM, PNs, ALT
 
 bp_BOM_route = Blueprint("BOM", __name__)
 
-"""
-Rota de BOMs
-
-    - /BOMs/                - (GET) - Listar BOMs
-    - /BOMs/                - (POST) - Inserir BOM no servidor (Filtrar)
-    - /BOMs/new             - (GET) - Rendenizar um formulário para criar uma BOM
-    - /BOMs/<código>        - (GET) - Obter dados de uma BOM (Retrabalho, versões, changelog e etc)
-    - /BOMs/<códugo>/edit   - (GET) - Rendenizar um formulário para editar uma BOM
-    - /BOMs/<códugo>/update - (PUT) - Atualizar  os dados da BOM
-    - /BOMs/<códugo>/delete - (DELETE) - Deleta BOM
-
-"""
-
 @bp_BOM_route.route('/', methods=['GET'])
-
 def lista_BOMs():
+
     placa = request.args.get('placa', '').strip()
     versao = request.args.get('versao', '').strip()
     status = request.args.get('status', '').strip()
     componente = request.args.get('componente', '').strip()
 
-    # Se os parâmetros forem passados com valores separados por vírgula, convertemos em listas
+    # Conversão de parâmetros para listas
     placas_filtro = placa.split(',') if placa else []
     versoes_filtro = versao.split(',') if versao else []
     status_filtro = status.split(',') if status else []
     componentes_filtro = componente.split(',') if componente else []
 
-     # Inicia a consulta base
-    query = db.session.query(BOMs.ID,
+    # Inicia a consulta base
+    query = db.session.query(
+        BOMs.ID,
         BOMs.Placa, 
         BOMs.Versao, 
         BOMs.Status, 
@@ -43,21 +32,11 @@ def lista_BOMs():
         PNs.Fabricante,
         PNs.PN,
         PNs.Status_PN
-    )  # Seleciona as duas tabelas
+    ).join(OITM, BOMs.Componente == OITM.Codigo).join(PNs, BOMs.Componente == PNs.Codigo_PN)
 
-    # Adiciona o join entre BOMs e Componentes com base no campo 'Componente'
-    query = query.join(OITM, BOMs.Componente == OITM.Codigo)
-
-    # Adiciona o join entre BOMs e PNs com base no campo 'Componente' e 'Codigo_PN'
-    query = query.join(PNs, BOMs.Componente == PNs.Codigo_PN)
-
+    # Filtros
     if placas_filtro:
         query = query.filter(BOMs.Placa.in_(placas_filtro))
-        placas_descricao = db.session.query(OITM.Codigo, OITM.Descricao).filter(OITM.Codigo.in_(placas_filtro))
-        resultados_placas = placas_descricao.all()
-    else:
-        resultados_placas = []
-
     if versoes_filtro:
         query = query.filter(BOMs.Versao.in_(versoes_filtro))
     if status_filtro:
@@ -67,28 +46,40 @@ def lista_BOMs():
 
     query = query.order_by(BOMs.Placa.desc(), BOMs.Versao.desc())
 
-    if (placa or versao or status or componente):
-    # Executa a consulta
-        resultados = query.all()
-    else:
-        resultados =[]
+    # Executa a consulta se algum filtro for passado
+    resultados = query.all() if (placa or versao or status or componente) else []
 
-    agrupados = {}
+    # Processamento de placas
+    df_dados_placas = []
+    if placas_filtro:
+        dados_placas = db.session.query(OITM.Codigo, OITM.Descricao).filter(OITM.Codigo.in_(placas_filtro))
+        query_placas = dados_placas.all()
+        df_dados_placas = [
+            {
+                "Codigo": placa.Codigo,
+                "Descricao": placa.Descricao,
+                "Link": f'<a href="http://loki/PADTEC%20-%20Campinas/Tecnologia/Hardware/Transferencia_PRO/Produto/IMTA" target="_blank">IMTA</a>',
+                "baixar": f'<a href="{url_for("BOM.download_BOM", placa=placa.Codigo)}" target="_blank">xlsx</a>'
+            }
+            for placa in query_placas
+        ]
 
+    # Agrupamento dos resultados
     dados_agrupados = {}
     for bom in resultados:
-        chave = bom.ID  # Tupla com Placa, Versão e Componente
+        chave = bom.ID
         if chave not in dados_agrupados:
             dados_agrupados[chave] = []
         dados_agrupados[chave].append(bom)
 
     return render_template('BOMs.html', 
                            dados_agrupados=dados_agrupados,
-                           dados_placa = resultados_placas,
+                           dados_placa=df_dados_placas,
                            placa=placa,
                            versao=versao,
                            status=status,
                            componente=componente)
+
 
 @bp_BOM_route.route('/new', methods=['POST'])
 def add_BOMs():
@@ -173,10 +164,10 @@ def alternativos_BOM():
     resultados =[]   
     if placa:
         query = query.filter(OITM.Codigo==placa)
-        placas_descricao = db.session.query(OITM.Codigo, OITM.Descricao).filter(OITM.Codigo==placa)
-        resultados_placas = placas_descricao.all()
+        dados_placas = db.session.query(OITM.Codigo, OITM.Descricao).filter(OITM.Codigo==placa)
+        query_placas = dados_placas.all()
     else:
-        resultados_placas = []
+        query_placas = []
 
     query = query.order_by(ALT.Comp_Princ.desc())
 
@@ -190,17 +181,49 @@ def alternativos_BOM():
 
     print(resultados)
 
-    return render_template('Alt.html', dados=resultados, dados_placa = resultados_placas)
+    return render_template('Alt.html', dados=resultados, dados_placa = query_placas)
 
 @bp_BOM_route.route('/edit', methods=['GET'])
 def form_edit_BOM():
     
     return render_template('fomulario_edit_BOM.html')
 
-@bp_BOM_route.route('<codigo_BOM>/update', methods=['PUT'])
-def update_BOM(codigo_BOM):
-    "Atualizar BOM"
-    pass   
+@bp_BOM_route.route('/download/<placa>', methods=['GET'])
+def download_BOM(placa):
+    print("Toaqui hein")
+    # Refaça a consulta para este caso específico da placa
+    query = db.session.query(BOMs.Placa, 
+        BOMs.Versao, 
+        BOMs.Status, 
+        BOMs.Componente, 
+        BOMs.Quantidade, 
+        BOMs.Designator, 
+        OITM.Descricao,
+        PNs.Fabricante,
+        PNs.PN,
+        PNs.Status_PN
+    ).join(OITM, BOMs.Componente == OITM.Codigo).join(PNs, BOMs.Componente == PNs.Codigo_PN)
+
+    query = query.filter(BOMs.Placa == placa)
+    baixar = query.all()
+    
+    # Filtra a consulta para a placa específica
+    df = pd.DataFrame(baixar, columns=[
+        "Placa", "Versao", "Status", "Componente", "Quantidade", "Designator",
+        "Descricao", "Fabricante", "PN", "Status_PN"
+    ])
+
+    # Gera o arquivo Excel em memória (em vez de CSV)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="BOMs")
+    output.seek(0)  # Volta para o começo do arquivo
+
+    # Configura a resposta para o download do arquivo Excel
+    response = Response(output.getvalue(), mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response.headers['Content-Disposition'] = f'attachment; filename={placa}_dados.xlsx'
+    return response
+
 
 @bp_BOM_route.route('delete', methods=['DELETE'])
 def deletar_cliente():
