@@ -150,7 +150,6 @@
                     <thead>
                         <tr>
                             <th scope="col"></th>
-                            <th scope="col"></th>
                             <th scope="col">Placa</th>
                             <th scope="col">Versão</th>
                             <th scope="col" class="status-column">Status</th>
@@ -167,9 +166,6 @@
                         {% for componente, itens in dados_agrupados.items() %}
                             <tr>
                                 <td rowspan="{{ itens|length }}">
-                                    <button type="button" class="btn btn-warning" onclick="toggleEdit('{{ itens[0].ID }}')">Editar</button>
-                                </td>
-                                <td rowspan="{{ itens|length }}">
                                     <form action="{{ url_for('BOM.form_delete_BOM', bom_id=itens[0].ID) }}" method="POST" style="display: inline;">
                                         <button type="submit" class="btn btn-danger"><strong>X</strong></button>
                                     </form>
@@ -181,19 +177,20 @@
                                 <td rowspan="{{ itens|length }}">
                                     {{ itens[0].Status }}
                                 </td>
+                                <!-- Agrupando Componente -->
                                 <td rowspan="{{ itens|length }}">
-                                    <form action="{{ url_for('BOM.form_edit_BOM', bom_id=itens[0].ID) }}" method="POST" id="edit-form-{{ itens[0].ID }}" style="display: inline;">
-                                        <span id="componente-text-{{ itens[0].ID }}">{{ itens[0].Componente }}</span>
-                                        <input type="text" id="componente-input-{{ itens[0].ID }}" name="new_componente" value="{{ itens[0].Componente }}" style="display: none;">
-                                        <button type="submit" id="save-button-{{ itens[0].ID }}" class="btn btn-success" style="display: none;">Salvar</button>
-                                    </form>
+                                    {{ itens[0].Componente }}
                                 </td>
+                                
+                                <!-- Agrupando Descrição -->
                                 <td rowspan="{{ itens|length }}">
                                     {{ itens[0].Descricao }}
                                 </td>
+                                <!-- Agrupando Quantidade -->
                                 <td rowspan="{{ itens|length }}">
                                     {{ itens[0].Quantidade }}
                                 </td>
+                                <!-- Agrupando Designator -->
                                 <td rowspan="{{ itens|length }}">
                                     {{ itens[0].Designator|truncate(10) }}
                                 </td>
@@ -212,27 +209,10 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                
-                <script>
-                    function toggleEdit(id) {
-                        var textElement = document.getElementById('componente-text-' + id);
-                        var inputElement = document.getElementById('componente-input-' + id);
-                        var saveButton = document.getElementById('save-button-' + id);
-                        
-                        // Alterna entre mostrar o texto e o campo de entrada
-                        if (inputElement.style.display === "none") {
-                            textElement.style.display = "none";
-                            inputElement.style.display = "inline";
-                            saveButton.style.display = "inline";  // Mostrar o botão de salvar
-                        } else {
-                            textElement.style.display = "inline";
-                            inputElement.style.display = "none";
-                            saveButton.style.display = "none";  // Esconder o botão de salvar
-                        }
-                    }
-                    </script>
             </div>
             
         </div>
+
+        
     </body>
     </html>

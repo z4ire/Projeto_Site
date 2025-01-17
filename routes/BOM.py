@@ -32,7 +32,7 @@ def lista_BOMs():
         PNs.Fabricante,
         PNs.PN,
         PNs.Status_PN
-    ).join(OITM, BOMs.Componente == OITM.Codigo).join(PNs, BOMs.Componente == PNs.Codigo_PN)
+    ).join(OITM, BOMs.Componente == OITM.Codigo).join(PNs, BOMs.Componente == PNs.Codigo_PN, isouter=True)
 
     # Filtros
     if placas_filtro:
@@ -79,7 +79,6 @@ def lista_BOMs():
                            versao=versao,
                            status=status,
                            componente=componente)
-
 
 @bp_BOM_route.route('/new', methods=['POST'])
 def add_BOMs():
@@ -183,10 +182,17 @@ def alternativos_BOM():
 
     return render_template('Alt.html', dados=resultados, dados_placa = query_placas)
 
-@bp_BOM_route.route('/edit', methods=['GET'])
-def form_edit_BOM():
-    
-    return render_template('fomulario_edit_BOM.html')
+@bp_BOM_route.route('/delete/<bom_id>', methods=['POST'])
+def form_delete_BOM(bom_id):
+    linha = BOMs.query.get(bom_id)
+    if linha:
+        db.session.delete(linha)
+        db.session.commit()
+        flash('Item excluído com sucesso!', 'success')
+    else:
+        flash('Item não encontrado!', 'error')
+
+    return redirect(request.referrer or url_for('home'))
 
 @bp_BOM_route.route('/download/<placa>', methods=['GET'])
 def download_BOM(placa):
@@ -221,11 +227,21 @@ def download_BOM(placa):
 
     # Configura a resposta para o download do arquivo Excel
     response = Response(output.getvalue(), mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response.headers['Content-Disposition'] = f'attachment; filename={placa}_dados.xlsx'
+    response.headers['Content-Disposition'] = f'attachment; filename=BOM_{placa}.xlsx'
     return response
 
+@bp_BOM_route.route('edit/<bom_id>', methods=['POST'])
+def form_edit_BOM(bom_id):
+    # query.get sempre pega a chave primária
+    linha = BOMs.query.get(bom_id)
+    if linha:
+        linha.Componente = request.form['new_componente']
+        linha.ID = linha.Placa + linha.Versao + linha.Status + linha.Componente + linha.Quantidade + linha.Designator
+        print(linha.ID)
+        db.session.commit()
 
-@bp_BOM_route.route('delete', methods=['DELETE'])
-def deletar_cliente():
-    "Deletar informações BOM"
-    pass   
+        flash('ITEM MODIFICADO', 'success')
+    else:
+        flash('Item não encontrado!', 'error')
+    
+    return redirect(request.referrer or url_for('home'))

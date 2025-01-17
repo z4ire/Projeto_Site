@@ -13,18 +13,6 @@
         .form-container {
             width: 45%;
         }
-        .flash-messages {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #65ec9e;
-            color: #000000;
-            padding: 10px;
-            border: 1px solid #65ec9e;
-            border-radius: 5px;
-            z-index: 9999;
-            max-width: 300px;
-        }
     </style>
 </head>
 <body>
@@ -69,16 +57,5 @@
     </div>
 
     <!-- Exibindo as mensagens flash -->
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div class="flash-messages">
-            <ul>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-    {% endwith %}
 </body>
 </html>
