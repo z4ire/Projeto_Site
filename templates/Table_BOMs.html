@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    
+</head>
+<body>
+
+    <table class="table-sm table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+                <th scope="col">Placa</th>
+                <th scope="col">Versão</th>
+                <th scope="col" style="width: 110px;">Status</th>
+                <th scope="col">Componente</th>
+                <th scope="col">Descrição</th>
+                <th scope="col">Quantidade</th>
+                <th scope="col">Designator</th>
+                <th scope="col">Fabricante</th>
+                <th scope="col">PN</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            {% for componente, itens in dados_agrupados.items() %}
+                <tr>
+                    <td rowspan="{{ itens|length }}">
+                        <button type="submit" form="edit-form-{{ itens[0].ID }}" id="save-button-{{ itens[0].ID }}" class="btn btn-success" style="display: none;">Salvar</button>
+                    </td>
+
+                    <td rowspan="{{ itens|length }}">
+                        <button type="button" class="btn btn-warning" onclick="toggleEdit('{{ itens[0].ID }}')">Editar</button>
+                    </td>
+                    <td rowspan="{{ itens|length }}">
+                        <form action="{{ url_for('BOM.form_delete_BOM', bom_id=itens[0].ID) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-danger"><strong>X</strong></button>
+                        </form>
+                    </td>
+                    <td>{{ itens[0].Placa }}</td>
+                    <td rowspan="{{ itens|length }}">
+                        {{ itens[0].Versao }}
+                    </td>
+                    <td rowspan="{{ itens|length }}">
+                        {{ itens[0].Status }}
+                    </td>
+                    <td rowspan="{{ itens|length }}">
+                        <form action="{{ url_for('BOM.form_edit_BOM', bom_id=itens[0].ID) }}" method="POST" id="edit-form-{{ itens[0].ID }}" style="display: inline;">
+                            <span id="componente-text-{{ itens[0].ID }}">{{ itens[0].Componente }}</span>
+                                    <input type="text" id="componente-input-{{ itens[0].ID }}" name="new_componente" value="{{ itens[0].Componente }}" style="display: none;">
+                        </form>
+                    </td>
+                    <td rowspan="{{ itens|length }}">
+                        {{ itens[0].Descricao }}
+                    </td>
+                    <td rowspan="{{ itens|length }}">
+                        {{ itens[0].Quantidade }}
+                    </td>
+                    <td rowspan="{{ itens|length }}">
+                        {{ itens[0].Designator|truncate(10) }}
+                    </td>
+                    <td>{{ itens[0].Fabricante }}</td>
+                    <td>{{ itens[0].PN }}</td>
+                    <td>{{ itens[0].Status_PN }}</td>
+                </tr>
+                {% for bom in itens[1:] %}
+                    <tr>
+                        <td>{{ bom.Placa }}</td>
+                        <td>{{ bom.Fabricante }}</td>
+                        <td>{{ bom.PN }}</td>
+                        <td>{{ bom.Status_PN }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

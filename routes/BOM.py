@@ -8,10 +8,10 @@ bp_BOM_route = Blueprint("BOM", __name__)
 @bp_BOM_route.route('/', methods=['GET'])
 def lista_BOMs():
 
-    placa = request.args.get('placa', '').strip()
-    versao = request.args.get('versao', '').strip()
-    status = request.args.get('status', '').strip()
-    componente = request.args.get('componente', '').strip()
+    placa = request.args.get('placa', '').replace(' ', '')  # Remove todos os espaços
+    versao = request.args.get('versao', '').replace(' ', '')  # Remove todos os espaços
+    status = request.args.get('status', '').strip()  # Remove todos os espaços
+    componente = request.args.get('componente', '').replace(' ', '')  # Remove todos os espaços
 
     # Conversão de parâmetros para listas
     placas_filtro = placa.split(',') if placa else []
@@ -44,10 +44,14 @@ def lista_BOMs():
     if componentes_filtro:
         query = query.filter(BOMs.Componente.in_(componentes_filtro))
 
-    query = query.order_by(BOMs.Placa.desc(), BOMs.Versao.desc())
+    # query = query.order_by(BOMs.Placa.desc(), BOMs.Versao.desc())
 
+    page = request.args.get('page', 1, type=int)  # Página atual, padrão 1
+    per_page = 100    # Resultados por página
+    query = query.order_by(BOMs.Placa.desc(), BOMs.Versao.desc())
+    resultados = query.paginate(page=page, per_page=per_page, error_out=False) if (placa or versao or status or componente) else []
     # Executa a consulta se algum filtro for passado
-    resultados = query.all() if (placa or versao or status or componente) else []
+    # resultados = query.all() if (placa or versao or status or componente) else []
 
     # Processamento de placas
     df_dados_placas = []
@@ -78,7 +82,8 @@ def lista_BOMs():
                            placa=placa,
                            versao=versao,
                            status=status,
-                           componente=componente)
+                           componente=componente,
+                           pagination=resultados)
 
 @bp_BOM_route.route('/new', methods=['POST'])
 def add_BOMs():
@@ -196,7 +201,6 @@ def form_delete_BOM(bom_id):
 
 @bp_BOM_route.route('/download/<placa>', methods=['GET'])
 def download_BOM(placa):
-    print("Toaqui hein")
     # Refaça a consulta para este caso específico da placa
     query = db.session.query(BOMs.Placa, 
         BOMs.Versao, 
@@ -236,6 +240,8 @@ def form_edit_BOM(bom_id):
     linha = BOMs.query.get(bom_id)
     if linha:
         linha.Componente = request.form['new_componente']
+        # linha.Designator = request.form['new_designator']
+
         linha.ID = linha.Placa + linha.Versao + linha.Status + linha.Componente + linha.Quantidade + linha.Designator
         print(linha.ID)
         db.session.commit()

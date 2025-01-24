@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../static/css_zaire/botoes.css">
         <title>Document</title>
 
         <style>
@@ -12,33 +13,6 @@
                 min-height: 100vh;  /* Garante que o layout ocupe pelo menos a altura da tela */
             }
             
-            /* Estilos para o botão de menu */
-            /* Estilos para o botão de menu flutuante */
-            #menu-button {
-                position: fixed;  /* Fixa o botão na tela */
-                bottom: 20px;     /* Distância do fundo da tela */
-                right: 20px;      /* Distância da lateral direita */
-                padding: 12px 25px;  /* Adiciona preenchimento confortável */
-                background-color: #007bff;  /* Cor de fundo azul */
-                color: white;  /* Cor do texto */
-                text-decoration: none;  /* Remove o sublinhado */
-                font-weight: bold;  /* Deixa o texto mais forte */
-                border-radius: 50px;  /* Bordas arredondadas para um estilo mais moderno */
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Adiciona sombra suave */
-                transition: background-color 0.3s ease, transform 0.2s ease;  /* Animações suaves */
-                z-index: 1000;  /* Garante que o botão fique acima de outros elementos */
-            }
-
-            #menu-button:hover {
-                background-color: #0056b3;  /* Cor de fundo mais escura ao passar o mouse */
-                transform: translateY(-4px);  /* Leve elevação do botão */
-            }
-
-            #menu-button:active {
-                background-color: #003f7f;  /* Cor mais escura ao clicar */
-                transform: translateY(0);  /* Retorna à posição original */
-            }
-
             /* Estilo para o sidebar (barra lateral) */
             .sidebar {
                 height: 100%;  /* A barra lateral ocupa toda a altura da tela */
@@ -64,26 +38,12 @@
                 text-align: center; /* Alinha o texto ao centro horizontalmente */
             }
 
-            /* Largura fixa para a coluna 'Status' */
-            .status-column {
-                width: 110px; /* Altere o valor conforme necessário */
-                white-space: nowrap; /* Impede que o texto quebre */
-                overflow: hidden; /* Oculta texto extra, se necessário */
-                text-overflow: ellipsis; /* Adiciona '...' para textos que excedem o limite */
-            }
-
-            /* Adicionando estilo para os botões */
-            .button-container {
-                display: flex;
-                flex-direction: column; /* Alinha os botões verticalmente */
-                gap: 10px; /* Espaço entre os botões */
-            }
-
     </style>
         </style>
     </head>
     <body>
         {% include 'menu.html' %}
+        <a href="#menu" id="menu-button">Voltar ao topo</a>
 
         <div class="content">
             <div class="sidebar">
@@ -101,7 +61,7 @@
                     <label for="componente">Componente:</label>
                     <input type="text" class="form-control" name="componente" value="{{ componente }}" placeholder="Digite o componente"><br><br>
 
-                    <div class="button-container">
+                    <div class="botao-filtrar">
                         <button type="submit">Filtrar</button>
                     </div>
 
@@ -119,14 +79,8 @@
                             <a href="{{ url_for('BOM.lista_BOMs') }}" class="btn-limpar">Limpar Filtros</a>
                         </div>
                     </div>
-
-                    <a href="#menu" id="menu-button">
-                        Voltar ao topo
-                    </a>
-                    
                 </form>
             </div>
-
 
             <div class="main-content">
 
@@ -146,93 +100,24 @@
                 </table>
                 <div style="margin-top: 20px;"></div>
                 
-                <table class="table-sm table table-bordered">
-                    <thead>
-                        <tr>
-                            <th scope="col"></th>
-                            <th scope="col"></th>
-                            <th scope="col">Placa</th>
-                            <th scope="col">Versão</th>
-                            <th scope="col" class="status-column">Status</th>
-                            <th scope="col">Componente</th>
-                            <th scope="col">Descrição</th>
-                            <th scope="col">Quantidade</th>
-                            <th scope="col">Designator</th>
-                            <th scope="col">Fabricante</th>
-                            <th scope="col">PN</th>
-                            <th scope="col">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-group-divider">
-                        {% for componente, itens in dados_agrupados.items() %}
-                            <tr>
-                                <td rowspan="{{ itens|length }}">
-                                    <button type="button" class="btn btn-warning" onclick="toggleEdit('{{ itens[0].ID }}')">Editar</button>
-                                </td>
-                                <td rowspan="{{ itens|length }}">
-                                    <form action="{{ url_for('BOM.form_delete_BOM', bom_id=itens[0].ID) }}" method="POST" style="display: inline;">
-                                        <button type="submit" class="btn btn-danger"><strong>X</strong></button>
-                                    </form>
-                                </td>
-                                <td>{{ itens[0].Placa }}</td>
-                                <td rowspan="{{ itens|length }}">
-                                    {{ itens[0].Versao }}
-                                </td>
-                                <td rowspan="{{ itens|length }}">
-                                    {{ itens[0].Status }}
-                                </td>
-                                <td rowspan="{{ itens|length }}">
-                                    <form action="{{ url_for('BOM.form_edit_BOM', bom_id=itens[0].ID) }}" method="POST" id="edit-form-{{ itens[0].ID }}" style="display: inline;">
-                                        <span id="componente-text-{{ itens[0].ID }}">{{ itens[0].Componente }}</span>
-                                        <input type="text" id="componente-input-{{ itens[0].ID }}" name="new_componente" value="{{ itens[0].Componente }}" style="display: none;">
-                                        <button type="submit" id="save-button-{{ itens[0].ID }}" class="btn btn-success" style="display: none;">Salvar</button>
-                                    </form>
-                                </td>
-                                <td rowspan="{{ itens|length }}">
-                                    {{ itens[0].Descricao }}
-                                </td>
-                                <td rowspan="{{ itens|length }}">
-                                    {{ itens[0].Quantidade }}
-                                </td>
-                                <td rowspan="{{ itens|length }}">
-                                    {{ itens[0].Designator|truncate(10) }}
-                                </td>
-                                <td>{{ itens[0].Fabricante }}</td>
-                                <td>{{ itens[0].PN }}</td>
-                                <td>{{ itens[0].Status_PN }}</td>
-                            </tr>
-                            {% for bom in itens[1:] %}
-                                <tr>
-                                    <td>{{ bom.Placa }}</td>
-                                    <td>{{ bom.Fabricante }}</td>
-                                    <td>{{ bom.PN }}</td>
-                                    <td>{{ bom.Status_PN }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% endfor %}
-                    </tbody>
-                </table>
-                
-                <script>
-                    function toggleEdit(id) {
-                        var textElement = document.getElementById('componente-text-' + id);
-                        var inputElement = document.getElementById('componente-input-' + id);
-                        var saveButton = document.getElementById('save-button-' + id);
-                        
-                        // Alterna entre mostrar o texto e o campo de entrada
-                        if (inputElement.style.display === "none") {
-                            textElement.style.display = "none";
-                            inputElement.style.display = "inline";
-                            saveButton.style.display = "inline";  // Mostrar o botão de salvar
-                        } else {
-                            textElement.style.display = "inline";
-                            inputElement.style.display = "none";
-                            saveButton.style.display = "none";  // Esconder o botão de salvar
-                        }
-                    }
-                    </script>
+                {% include 'Table_BOMs.html' %}
+
+                <!-- Paginação -->
+                <div class="pagination">
+                    <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+                    <br>
+                    {% if pagination.has_prev %}
+                        <a href="{{ url_for('BOM.lista_BOMs', page=1, placa=placa, versao=versao, status=status, componente=componente) }}" class="btn btn-link">First</a>
+                        <a href="{{ url_for('BOM.lista_BOMs', page=pagination.prev_num, placa=placa, versao=versao, status=status, componente=componente) }}" class="btn btn-link">Previous</a>
+                    {% endif %}
+                    
+                    {% if pagination.has_next %}
+                        <a href="{{ url_for('BOM.lista_BOMs', page=pagination.next_num, placa=placa, versao=versao, status=status, componente=componente) }}" class="btn btn-link">Next</a>
+                        <a href="{{ url_for('BOM.lista_BOMs', page=pagination.pages, placa=placa, versao=versao, status=status, componente=componente) }}" class="btn btn-link">Last</a>
+                    {% endif %}
+                </div>
             </div>
-            
         </div>
+        <script src="../static/js_zaire/salvar_edit.js"></script>
     </body>
     </html>
