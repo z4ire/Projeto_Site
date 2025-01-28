@@ -92,8 +92,14 @@
                         <tr>
                             <td style="width: 150px;"><strong>{{ placa.Codigo }}</strong></td>
                             <td style="width: 500px;"><strong>{{ placa.Descricao }}</strong></td>
-                            <td style="width: 80px;">{{ placa.Link | safe }}</td>
-                            <td style="width: 80px;">{{ placa.baixar | safe }}</td>
+                            <td style="width: 80px;">
+                                <a href="http://loki/PADTEC%20-%20Campinas/Tecnologia/Hardware/Transferencia_PRO/Produto/IMTA" target="_blank">
+                                    IMTA
+                                </a>
+                            </td>
+                            <td style="width: 80px;">
+                                <a href="{{ placa.baixar }}" target="_blank">xlsx</a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

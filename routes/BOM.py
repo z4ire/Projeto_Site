@@ -1,4 +1,5 @@
 import pandas as pd
+import uuid
 from io import BytesIO
 from flask import Blueprint, request, render_template, redirect, flash, url_for, Response
 from database.models.database_class import db, BOMs, OITM, PNs, ALT
@@ -7,19 +8,16 @@ bp_BOM_route = Blueprint("BOM", __name__)
 
 @bp_BOM_route.route('/', methods=['GET'])
 def lista_BOMs():
+    # Processa os parâmetros de entrada
+    def processa_parametro(parametro):
+        return parametro.replace(' ', '').split(',') if parametro else []
 
-    placa = request.args.get('placa', '').replace(' ', '')  # Remove todos os espaços
-    versao = request.args.get('versao', '').replace(' ', '')  # Remove todos os espaços
-    status = request.args.get('status', '').strip()  # Remove todos os espaços
-    componente = request.args.get('componente', '').replace(' ', '')  # Remove todos os espaços
+    placa = processa_parametro(request.args.get('placa', ''))
+    versao = processa_parametro(request.args.get('versao', ''))
+    status = processa_parametro(request.args.get('status', '').strip())
+    componente = processa_parametro(request.args.get('componente', ''))
 
-    # Conversão de parâmetros para listas
-    placas_filtro = placa.split(',') if placa else []
-    versoes_filtro = versao.split(',') if versao else []
-    status_filtro = status.split(',') if status else []
-    componentes_filtro = componente.split(',') if componente else []
-
-    # Inicia a consulta base
+    # Constrói a consulta base
     query = db.session.query(
         BOMs.ID,
         BOMs.Placa, 
@@ -34,56 +32,68 @@ def lista_BOMs():
         PNs.Status_PN
     ).join(OITM, BOMs.Componente == OITM.Codigo).join(PNs, BOMs.Componente == PNs.Codigo_PN, isouter=True)
 
-    # Filtros
-    if placas_filtro:
-        query = query.filter(BOMs.Placa.in_(placas_filtro))
-    if versoes_filtro:
-        query = query.filter(BOMs.Versao.in_(versoes_filtro))
-    if status_filtro:
-        query = query.filter(BOMs.Status.in_(status_filtro))
-    if componentes_filtro:
-        query = query.filter(BOMs.Componente.in_(componentes_filtro))
+    # Cria a lista de filtros dinamicamente
+    filtros = []
+    if placa:
+        filtros.append(BOMs.Placa.in_(placa))
+    if versao:
+        filtros.append(BOMs.Versao.in_(versao))
+    if status:
+        filtros.append(BOMs.Status.in_(status))
+    if componente:
+        filtros.append(BOMs.Componente.in_(componente))
 
-    # query = query.order_by(BOMs.Placa.desc(), BOMs.Versao.desc())
+    # Se ao menos um filtro for passado, aplica os filtros à consulta
+    if filtros:
+        query = query.filter(*filtros)
+    else:
+        # Se não houver filtros, retorna uma lista vazia
+        resultados = []
+        return render_template(
+            'BOMs.html', 
+            dados_agrupados={},
+            dados_placa=[],
+            placa=','.join(placa),
+            versao=','.join(versao),
+            status=','.join(status),
+            componente=','.join(componente),
+            pagination=resultados
+        )
 
-    page = request.args.get('page', 1, type=int)  # Página atual, padrão 1
-    per_page = 100    # Resultados por página
-    query = query.order_by(BOMs.Placa.desc(), BOMs.Versao.desc())
-    resultados = query.paginate(page=page, per_page=per_page, error_out=False) if (placa or versao or status or componente) else []
-    # Executa a consulta se algum filtro for passado
-    # resultados = query.all() if (placa or versao or status or componente) else []
+    # Paginação
+    page = request.args.get('page', 1, type=int)
+    per_page = 100
+    resultados = query.order_by(BOMs.Placa.desc(), BOMs.Versao.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
-    # Processamento de placas
-    df_dados_placas = []
-    if placas_filtro:
-        dados_placas = db.session.query(OITM.Codigo, OITM.Descricao).filter(OITM.Codigo.in_(placas_filtro))
-        query_placas = dados_placas.all()
-        df_dados_placas = [
+    # Consulta para placas (se necessário)
+    dados_placas = []
+    if placa:
+        dados_placas = db.session.query(OITM.Codigo, OITM.Descricao).filter(OITM.Codigo.in_(placa)).all()
+        dados_placas = [
             {
-                "Codigo": placa.Codigo,
-                "Descricao": placa.Descricao,
-                "Link": f'<a href="http://loki/PADTEC%20-%20Campinas/Tecnologia/Hardware/Transferencia_PRO/Produto/IMTA" target="_blank">IMTA</a>',
-                "baixar": f'<a href="{url_for("BOM.download_BOM", placa=placa.Codigo)}" target="_blank">xlsx</a>'
+                "Codigo": p.Codigo,
+                "Descricao": p.Descricao,
+                "baixar": url_for("BOM.download_BOM", placa=p.Codigo)
             }
-            for placa in query_placas
+            for p in dados_placas
         ]
 
     # Agrupamento dos resultados
     dados_agrupados = {}
-    for bom in resultados:
-        chave = bom.ID
-        if chave not in dados_agrupados:
-            dados_agrupados[chave] = []
-        dados_agrupados[chave].append(bom)
+    for bom in resultados.items:
+        dados_agrupados.setdefault(bom.ID, []).append(bom)
 
-    return render_template('BOMs.html', 
-                           dados_agrupados=dados_agrupados,
-                           dados_placa=df_dados_placas,
-                           placa=placa,
-                           versao=versao,
-                           status=status,
-                           componente=componente,
-                           pagination=resultados)
+    # Renderiza o template
+    return render_template(
+        'BOMs.html', 
+        dados_agrupados=dados_agrupados,
+        dados_placa=dados_placas,
+        placa=','.join(placa),
+        versao=','.join(versao),
+        status=','.join(status),
+        componente=','.join(componente),
+        pagination=resultados
+    )
 
 @bp_BOM_route.route('/new', methods=['POST'])
 def add_BOMs():
@@ -100,7 +110,6 @@ def add_BOMs():
             # Itera pelas linhas do DataFrame e adiciona ao banco de dados
             for _, row in data.iterrows():
                 new_BOM = BOMs(
-                    ID=f"{row['Placa']}{row['Versao']}{row['Status']}{row['Componente']}{row['Quantidade']}{row['Designator']}",
                     Placa=row['Placa'],
                     Versao=row['Versao'],
                     Status=row['Status'],
@@ -126,7 +135,6 @@ def add_BOMs():
 
         # Cria o novo BOM a partir dos dados do formulário
         new_BOM = BOMs(
-            ID=f"{new_placa}{new_versao}{new_status}{new_componente}{new_quantidade}{new_designator}",
             Placa=new_placa,
             Versao=new_versao,
             Status=new_status,
@@ -216,22 +224,21 @@ def download_BOM(placa):
 
     query = query.filter(BOMs.Placa == placa)
     baixar = query.all()
-    
-    # Filtra a consulta para a placa específica
+
+    # Converte os dados para DataFrame
     df = pd.DataFrame(baixar, columns=[
         "Placa", "Versao", "Status", "Componente", "Quantidade", "Designator",
         "Descricao", "Fabricante", "PN", "Status_PN"
     ])
 
-    # Gera o arquivo Excel em memória (em vez de CSV)
+    # Gera o arquivo CSV em memória
     output = BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name="BOMs")
-    output.seek(0)  # Volta para o começo do arquivo
+    df.to_csv(output, index=False, sep=';', encoding='utf-8-sig')  # utf-8-sig para compatibilidade com Excel
+    output.seek(0)
 
-    # Configura a resposta para o download do arquivo Excel
-    response = Response(output.getvalue(), mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response.headers['Content-Disposition'] = f'attachment; filename=BOM_{placa}.xlsx'
+    # Configura a resposta para o download do arquivo CSV
+    response = Response(output.getvalue(), mimetype='text/csv')
+    response.headers['Content-Disposition'] = f'attachment; filename=BOM_{placa}.csv'
     return response
 
 @bp_BOM_route.route('edit/<bom_id>', methods=['POST'])
@@ -241,8 +248,6 @@ def form_edit_BOM(bom_id):
     if linha:
         linha.Componente = request.form['new_componente']
         # linha.Designator = request.form['new_designator']
-
-        linha.ID = linha.Placa + linha.Versao + linha.Status + linha.Componente + linha.Quantidade + linha.Designator
         print(linha.ID)
         db.session.commit()
 
