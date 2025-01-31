@@ -32,6 +32,10 @@ class ALT(db.Model):
     Placa_ALT = db.Column(db.String(20))
     Comp_Princ = db.Column(db.String(20))
     Comp_Alt = db.Column(db.String(20))
-    CONCAT = db.Column(db.String(100), primary_key=True)
+    ID_alt = db.Column(db.Integer, primary_key=True)
 
+class Data_Att(db.Model):
+    __tablename__ = 'Metadata'
+    ID_att = db.Column(db.Integer, primary_key=True)
+    last_update = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 

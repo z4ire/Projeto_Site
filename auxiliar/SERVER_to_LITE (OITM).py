@@ -5,6 +5,25 @@
 # apenas quando existirem registros a serem transferidos.
 import pyodbc
 import sqlite3
+from datetime import datetime
+
+
+# Função para atualizar o horário da última modificação
+def atualizar_horario(conexao_sqlite):
+    cursor = conexao_sqlite.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS metadata (
+            id INTEGER PRIMARY KEY CHECK (ID_Att = 1),
+            last_update DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    
+    cursor.execute("""
+        INSERT INTO metadata (ID_Att, last_update)
+        VALUES (1, ?) 
+        ON CONFLICT(ID_Att) DO UPDATE SET last_update = excluded.last_update
+    """, (datetime.now(),))
+    conexao_sqlite.commit()
 
 server = "kimera"
 database = "Repositorio_SAP"
@@ -63,6 +82,7 @@ if dados_sqlserver:
     # Commit para garantir que as alterações sejam salvas
     # O commit é realizado para garantir que todas as inserções feitas na tabela sejam salvas permanentemente no banco de dados.
     conexao_sqlite.commit()
+    atualizar_horario(conexao_sqlite)
 else:
     # Caso não existam dados recuperados, exibe uma mensagem informando que nenhuma alteração foi feita.
     print("Nenhum dado foi retornado do SQL Server. Nenhuma alteração foi feita na tabela SQLite.")

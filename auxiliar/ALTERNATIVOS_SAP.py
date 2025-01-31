@@ -44,7 +44,7 @@ if dados_sqlserver:
         U_NEO_ITEM_PRO = (U_NEO_ITEM_PRO or "").strip()
         U_NEO_ITEM = (U_NEO_ITEM or "").strip()
         U_NEO_ITEM_AL = (U_NEO_ITEM_AL or "").strip()
-        concatenado = f"{U_NEO_ITEM_PRO}{U_NEO_ITEM}{U_NEO_ITEM_AL}"
+        concatenado = None
         dados_para_inserir.append((U_NEO_ITEM_PRO, U_NEO_ITEM, U_NEO_ITEM_AL, concatenado))
 
     # Exibindo os dados concatenados para conferência
@@ -52,7 +52,7 @@ if dados_sqlserver:
 
     # Inserir os novos dados na tabela SQLite
     cursor_sqlite.executemany('''
-    INSERT INTO ALTERNATIVOS_SAP (Placa_ALT, Comp_Princ, Comp_Alt, CONCAT)
+    INSERT INTO ALTERNATIVOS_SAP (Placa_ALT, Comp_Princ, Comp_Alt, ID_Alt)
     VALUES (?, ?, ?, ?)
     ''', dados_para_inserir)  # Usar 'dados_para_inserir', não 'dados_sqlserver'
 

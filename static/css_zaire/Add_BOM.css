@@ -1,0 +1,108 @@
+/* Estilo para o conteúdo principal */
+
+
+/* Estilo da coluna à esquerda */
+.left-side-1 {
+    position: absolute;
+    top: 90px;    /* Ajuste a distância do topo */
+    left: 50px;  /* Ajuste a distância da direita */
+    width: 40%;   /* Ajuste conforme necessário */
+    padding-top: 25px;
+    padding-left: 25px;
+    padding-bottom: 20px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo da coluna à direita */
+.left-side-2 {
+    position: absolute;
+    top: 350px;    /* Ajuste a distância do topo */
+    right: 50px;  /* Ajuste a distância da direita */
+    width: 40%;   /* Ajuste conforme necessário */
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
+    padding-top: 25px;
+    padding-left: 25px;
+    padding-bottom: 20px;
+}
+
+/* Estilo da coluna à esquerda */
+.right-side-1 {
+    position: absolute;
+    top: 90px;    /* Ajuste a distância do topo */
+    right: 50px;  /* Ajuste a distância da direita */
+    width: 40%;   /* Ajuste conforme necessário */
+    padding-top: 25px;
+    padding-left: 25px;
+    padding-bottom: 20px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo da coluna à direita */
+.right-side-2 {
+    position: absolute;
+    top: 350px;    /* Ajuste a distância do topo */
+    right: 50px;  /* Ajuste a distância da direita */
+    width: 40%;   /* Ajuste conforme necessário */
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
+    padding-top: 25px;
+    padding-left: 25px;
+    padding-bottom: 20px;
+}
+
+/* Formulários e outros estilos continuam iguais */
+
+.form-description {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.form-label {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    display: block;
+    color: #444;
+}
+
+.form-input {
+    width: 95%;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #5c6bc0;
+    box-shadow: 0 0 5px rgba(92, 107, 192, 0.5);
+}
+
+.submit-btn {
+    
+    background-color: #5c6bc0;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #3f4a99;
+}
+
+.submit-btn:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(92, 107, 192, 0.5);
+}

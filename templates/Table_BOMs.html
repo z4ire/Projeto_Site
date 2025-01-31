@@ -1,41 +1,55 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    
+<head> 
+    <style>
+        #tabela1 td {
+            vertical-align: middle; /* Alinha ao centro verticalmente */
+            text-align: center; /* Alinha o texto ao centro horizontalmente */
+            border: 1px solid #b3afaf7c;
+        }
+        #tabela1 th {
+            vertical-align: middle; /* Alinha ao centro verticalmente */
+            text-align: center; /* Alinha o texto ao centro horizontalmente */
+            border: 1px solid #b3afaf7c;
+            position: sticky;
+            top: 0; /* Fixa o cabeçalho no topo da tela ao rolar */
+            z-index: 1; /* Garante que o cabeçalho fique acima das células da tabela */
+        }
+    </style>
 </head>
 <body>
 
-    <table class="table-sm table table-bordered">
+    <table id="tabela1" class="table-sm table">
         <thead>
             <tr>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-                <th scope="col">Placa</th>
-                <th scope="col">Versão</th>
-                <th scope="col" style="width: 110px;">Status</th>
-                <th scope="col">Componente</th>
-                <th scope="col">Descrição</th>
-                <th scope="col">Quantidade</th>
-                <th scope="col">Designator</th>
-                <th scope="col">Fabricante</th>
-                <th scope="col">PN</th>
-                <th scope="col">Status</th>
+                <th style="border: none" scope="col"></th>
+                <th style="border: none" scope="col"></th>
+                <th style="border: none" scope="col"></th>
+                <th style="background-color: #faf8f8" scope="col">Placa</th>
+                <th style="background-color: #faf8f8" scope="col">Versão</th>
+                <th style="background-color: #faf8f8" scope="col" style="width: 110px;">Status</th>
+                <th style="background-color: #faf8f8" scope="col">Componente</th>
+                <th style="background-color: #faf8f8" scope="col">Descrição</th>
+                <th style="background-color: #faf8f8" scope="col">Quantidade</th>
+                <th style="background-color: #faf8f8" scope="col">Designator</th>
+                <th style="background-color: #faf8f8" scope="col">Fabricante</th>
+                <th style="background-color: #faf8f8" scope="col">PN</th>
+                <th style="background-color: #faf8f8" scope="col">Status</th>
             </tr>
         </thead>
         <tbody class="table-group-divider">
             {% for componente, itens in dados_agrupados.items() %}
                 <tr>
                     <td rowspan="{{ itens|length }}">
-                        <button type="submit" form="edit-form-{{ itens[0].ID }}" id="save-button-{{ itens[0].ID }}" class="btn btn-success" style="display: none;">Salvar</button>
+                        <button type="submit" form="edit-form-{{ itens[0].ID }}" id="save-button-{{ itens[0].ID }}" class="btn btn-success px-1 py-0" style="display: none;">Salvar</button>
                     </td>
 
                     <td rowspan="{{ itens|length }}">
-                        <button type="button" class="btn btn-warning" onclick="toggleEdit('{{ itens[0].ID }}')">Editar</button>
+                        <button type="button" class="btn btn-warning px-1 py-0" onclick="toggleEdit('{{ itens[0].ID }}')">Editar</button>
                     </td>
                     <td rowspan="{{ itens|length }}">
                         <form action="{{ url_for('BOM.form_delete_BOM', bom_id=itens[0].ID) }}" method="POST" style="display: inline;">
-                            <button type="submit" class="btn btn-danger"><strong>X</strong></button>
+                            <button type="submit" class="btn btn-danger px-1 py-0"><strong>X</strong></button>
                         </form>
                     </td>
                     <td>{{ itens[0].Placa }}</td>

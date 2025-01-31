@@ -33,12 +33,11 @@
             }
 
             /* Estilo para a tabela */
-            .table td, .table th {
+            .tablex td, .table th {
                 vertical-align: middle; /* Alinha ao centro verticalmente */
                 text-align: center; /* Alinha o texto ao centro horizontalmente */
             }
 
-    </style>
         </style>
     </head>
     <body>
@@ -62,7 +61,7 @@
                     <input type="text" class="form-control" name="componente" value="{{ componente }}" placeholder="Digite o componente"><br><br>
 
                     <div class="botao-filtrar">
-                        <button type="submit">Filtrar</button>
+                        <button class="btn btn-outline-info" type="submit">Filtrar</button>
                     </div>
 
                     <div style="color: red;">
@@ -79,12 +78,14 @@
                             <a href="{{ url_for('BOM.lista_BOMs') }}" class="btn-limpar">Limpar Filtros</a>
                         </div>
                     </div>
+                    <!-- <p style="margin-top: 200px;">Sincronização SAP</p>
+                    <p style="margin-top: -10px;">{{ last_update }}</p> -->
                 </form>
             </div>
 
             <div class="main-content">
 
-                <table style="margin-left: auto; margin-right: 0; color: red; text-align: center;" class="table-bordered">
+                <table style="margin-left: auto; margin-right: 0; color: rgb(0, 0, 0); text-align: center;" class="table-bordered">
                     <thead>
                     </thead>
                     <tbody>
@@ -92,13 +93,13 @@
                         <tr>
                             <td style="width: 150px;"><strong>{{ placa.Codigo }}</strong></td>
                             <td style="width: 500px;"><strong>{{ placa.Descricao }}</strong></td>
-                            <td style="width: 80px;">
+                            <td style="width: 200px;">
                                 <a href="http://loki/PADTEC%20-%20Campinas/Tecnologia/Hardware/Transferencia_PRO/Produto/IMTA" target="_blank">
-                                    IMTA
+                                    Instrução de Montagem
                                 </a>
                             </td>
                             <td style="width: 80px;">
-                                <a href="{{ placa.baixar }}" target="_blank">xlsx</a>
+                                <a href="{{ placa.baixar }}" target="_blank">csv</a>
                             </td>
                         </tr>
                         {% endfor %}

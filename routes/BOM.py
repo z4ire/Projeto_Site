@@ -1,13 +1,24 @@
 import pandas as pd
-import uuid
+from datetime import datetime
 from io import BytesIO
 from flask import Blueprint, request, render_template, redirect, flash, url_for, Response
-from database.models.database_class import db, BOMs, OITM, PNs, ALT
+from database.models.database_class import db, BOMs, OITM, PNs, ALT, Data_Att
+
+
+# Implementar:
+#     Tela de confirmação de exclusão de linha.
+#     Tela com changelog
+#     Ajustar tela de adição de linha/BOM
+#     Barra de carregamento para BOMs (Contato em tempo real entre back e front)
+#     Solicitar ao TI o espelhamento dos campos de descrição e quantidade da tela de alternativos do SAP
 
 bp_BOM_route = Blueprint("BOM", __name__)
 
 @bp_BOM_route.route('/', methods=['GET'])
 def lista_BOMs():
+
+    data_hora = Data_Att.query.first()
+
     # Processa os parâmetros de entrada
     def processa_parametro(parametro):
         return parametro.replace(' ', '').split(',') if parametro else []
@@ -43,6 +54,10 @@ def lista_BOMs():
     if componente:
         filtros.append(BOMs.Componente.in_(componente))
 
+    last_update = data_hora.last_update if data_hora else None
+    if last_update:
+        last_update  = last_update.strftime("%Y-%m-%d %H:%M:%S")
+
     # Se ao menos um filtro for passado, aplica os filtros à consulta
     if filtros:
         query = query.filter(*filtros)
@@ -57,13 +72,14 @@ def lista_BOMs():
             versao=','.join(versao),
             status=','.join(status),
             componente=','.join(componente),
-            pagination=resultados
+            pagination=resultados,
+            last_update=last_update
         )
 
     # Paginação
     page = request.args.get('page', 1, type=int)
     per_page = 100
-    resultados = query.order_by(BOMs.Placa.desc(), BOMs.Versao.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    resultados = query.order_by(BOMs.Placa.asc(), BOMs.Versao.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
     # Consulta para placas (se necessário)
     dados_placas = []
@@ -92,7 +108,8 @@ def lista_BOMs():
         versao=','.join(versao),
         status=','.join(status),
         componente=','.join(componente),
-        pagination=resultados
+        pagination=resultados,
+        last_update=last_update
     )
 
 @bp_BOM_route.route('/new', methods=['POST'])
@@ -133,20 +150,28 @@ def add_BOMs():
         new_quantidade = request.form.get('new_quantidade', '').strip()
         new_designator = request.form.get('new_designator', '').strip()
 
-        # Cria o novo BOM a partir dos dados do formulário
-        new_BOM = BOMs(
-            Placa=new_placa,
-            Versao=new_versao,
-            Status=new_status,
-            Componente=new_componente,
-            Quantidade=new_quantidade,
-            Designator=new_designator
-        )
-        
-        # Adiciona o novo BOM ao banco de dados
-        db.session.add(new_BOM)
-        db.session.commit()
-        flash('Dados carregados com sucesso.')
+       # Verifica se todos os campos foram preenchidos
+        if any([new_placa, new_versao, new_status, new_componente, new_quantidade, new_designator]):
+
+            if all([new_placa, new_versao, new_status, new_componente, new_quantidade, new_designator]):
+                # Cria o novo BOM a partir dos dados do formulário
+                new_BOM = BOMs(
+                    Placa=new_placa,
+                    Versao=new_versao,
+                    Status=new_status,
+                    Componente=new_componente,
+                    Quantidade=new_quantidade,
+                    Designator=new_designator
+                )
+
+                # Adiciona o novo BOM ao banco de dados
+                db.session.add(new_BOM)
+                db.session.commit()
+                flash('Dados carregados com sucesso.', 'success')
+            else:  
+                flash('Nem todos os campos foram preenchidos', 'success')
+        else:
+            flash('Não é um xlsx', 'success')
 
     return render_template('formulario_cadastro_BOM.html')
 
