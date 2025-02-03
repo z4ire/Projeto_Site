@@ -39,3 +39,11 @@ class Data_Att(db.Model):
     ID_att = db.Column(db.Integer, primary_key=True)
     last_update = db.Column(db.DateTime, server_default=db.func.current_timestamp())
 
+class Versionamento(db.Model):
+    __tablename__ = 'Versionamento'
+    ID_V = db.Column(db.Integer, primary_key=True)
+    Placa_V = db.Column(db.String(20))
+    Versao = db.Column(db.String(4))
+    Status = db.Column(db.String(20))
+    Data_Cri = db.Column(db.String(20))
+

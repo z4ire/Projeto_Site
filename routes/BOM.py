@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime
 from io import BytesIO
 from flask import Blueprint, request, render_template, redirect, flash, url_for, Response
-from database.models.database_class import db, BOMs, OITM, PNs, ALT, Data_Att
+from database.models.database_class import db, BOMs, OITM, PNs, ALT, Data_Att, Versionamento
 
 
 # Implementar:
@@ -176,7 +176,20 @@ def add_BOMs():
     return render_template('formulario_cadastro_BOM.html')
 
 @bp_BOM_route.route('/new', methods=['GET'])
-def form_cadastro_BOM():
+def versoes():
+    # Constrói a consulta base
+    query = db.session.query(
+        Versionamento.Placa_V,
+        Versionamento.Versao,
+        Versionamento.Status,
+        Versionamento.Data_Cri, 
+        OITM.Descricao
+    ).join(OITM, Versionamento.Placa_V == OITM.Codigo)
+
+    placa = request.form.get('new_placa', '').strip()
+    
+    query = query
+
     "Formulário para cadastrar uma BOM"
     return render_template('formulario_cadastro_BOM.html')
 

@@ -9,6 +9,15 @@
 <body>
 
     <div class="left-side-1">
+
+        <form method="GET" action="{{ url_for('BOM.versoes') }}">
+            <label for="placa">Placa:</label>
+            <input type="text" class="form-control" name="placa" value="{{ placa }}" placeholder="Digite a placa"><br><br>
+            <div class="button-container">
+                <button class="btn btn-outline-info" type="submit">Filtrar</button>
+            </div>
+        </form>
+
         <table>
             
         </table>
