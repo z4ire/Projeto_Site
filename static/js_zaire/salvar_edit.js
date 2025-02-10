@@ -14,3 +14,22 @@ function toggleEdit(id) {
         saveButton.style.display = "none";  // Esconder o botão de salvar
     }
 }
+
+function toggleEdit2(id) {
+    var statusTextElement = document.getElementById('status-text-' + id);  // Elemento que exibe o texto do status
+    var statusInputElement = document.getElementById('status-input-' + id);  // Elemento de entrada de texto para edição do status
+    var saveButton = document.getElementById('save-button-' + id);  // Botão de salvar
+    
+    // Alterna entre mostrar o texto e o campo de entrada para o status
+    if (statusInputElement.style.display === "none") {
+        statusTextElement.style.display = "none";  // Esconde o texto do status
+        statusInputElement.style.display = "inline";  // Exibe o campo de entrada para edição
+        saveButton.style.display = "inline";  // Exibe o botão de salvar
+
+    } else {
+        statusTextElement.style.display = "inline";  // Exibe o texto do status novamente
+        statusInputElement.style.display = "none";  // Esconde o campo de entrada
+        saveButton.style.display = "none";  // Esconde o botão de salvar
+    }
+}
+

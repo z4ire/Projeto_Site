@@ -6,19 +6,24 @@
     position: absolute;
     top: 90px;    /* Ajuste a distância do topo */
     left: 50px;  /* Ajuste a distância da direita */
-    width: 40%;   /* Ajuste conforme necessário */
+    width: 48.5%;   /* Ajuste conforme necessário */
     padding-top: 25px;
     padding-left: 25px;
     padding-bottom: 20px;
     background-color: #f4f4f4;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
+}
+
+.left-side-1 input, 
+.left-side-1 textarea {
+    width: 97%; /* Ajuste para reduzir o comprimento dos campos */
 }
 
 /* Estilo da coluna à direita */
 .left-side-2 {
     position: absolute;
-    top: 350px;    /* Ajuste a distância do topo */
+    top: 320px;    /* Ajuste a distância do topo */
     right: 50px;  /* Ajuste a distância da direita */
     width: 40%;   /* Ajuste conforme necessário */
     background-color: #f4f4f4;
@@ -34,7 +39,7 @@
     position: absolute;
     top: 90px;    /* Ajuste a distância do topo */
     right: 50px;  /* Ajuste a distância da direita */
-    width: 40%;   /* Ajuste conforme necessário */
+    width: 45%;   /* Ajuste conforme necessário */
     padding-top: 25px;
     padding-left: 25px;
     padding-bottom: 20px;
@@ -46,9 +51,9 @@
 /* Estilo da coluna à direita */
 .right-side-2 {
     position: absolute;
-    top: 350px;    /* Ajuste a distância do topo */
+    top: 310px;    /* Ajuste a distância do topo */
     right: 50px;  /* Ajuste a distância da direita */
-    width: 40%;   /* Ajuste conforme necessário */
+    width: 45%;   /* Ajuste conforme necessário */
     background-color: #f4f4f4;
     border-radius: 8px;
     box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
@@ -57,38 +62,30 @@
     padding-bottom: 20px;
 }
 
-/* Formulários e outros estilos continuam iguais */
-
-.form-description {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-    color: #555;
+.right-side-2 input, 
+.right-side-2 textarea {
+    width: 90%; /* Ajuste para reduzir o comprimento dos campos */
 }
 
-.form-label {
-    font-size: 1rem;
-    margin-bottom: 5px;
-    display: block;
-    color: #444;
+.form-row {
+    display: flex;
+    gap: 20px; /* Ajusta o espaçamento entre os campos */
+    margin-bottom: 15px; /* Ajusta o espaçamento entre as linhas */
+}
+
+.form-group {
+    flex: 1; /* Os campos ocupam a mesma largura dentro da linha */
+    display: flex;
+    flex-direction: column; /* Garante que o label e o input fiquem empilhados */
 }
 
 .form-input {
-    width: 95%;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    color: #333;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #5c6bc0;
-    box-shadow: 0 0 5px rgba(92, 107, 192, 0.5);
+    width: 100%; /* Garante que o campo de entrada ocupe toda a largura do seu container */
 }
 
 .submit-btn {
-    
+    width: auto;
+    padding: 10px 20px; /* Ajuste do tamanho do botão */
     background-color: #5c6bc0;
     color: white;
     border: none;

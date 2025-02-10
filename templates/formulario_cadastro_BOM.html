@@ -9,17 +9,92 @@
 <body>
 
     <div class="left-side-1">
-
         <form method="GET" action="{{ url_for('BOM.versoes') }}">
-            <label for="placa">Placa:</label>
-            <input type="text" class="form-control" name="placa" value="{{ placa }}" placeholder="Digite a placa"><br><br>
-            <div class="button-container">
-                <button class="btn btn-outline-info" type="submit">Filtrar</button>
+           
+            <input type="text" class="form-input" name="placa" value="{{ placa }}" placeholder="Digite a placa"><br><br>
+            <div class="button-container"style="display: flex; justify-content: flex-end; margin-right: 25.5px;">
+                <button type="submit" class="btn btn-outline-success">Filtrar</button>
             </div>
         </form>
+        <table style="text-align: center; border: 1px solid black; width: 96.5%; margin-top: 20px;">
+            <thead>
 
-        <table>
-            
+            </thead>
+            <tbody>
+                {% if versoes %}
+                    <tr>
+                        <td>{{ versoes[0].Placa_V }}</td> <!-- Exibe a Placa uma vez -->
+                        <td>{{ versoes[0].Descricao }}</td> <!-- Exibe a Descrição uma vez -->
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="2">-</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <table style="text-align: center; border: 1px solid black; width: 96.5%; margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th style="width: 25px;"></th>
+                    <th style="width: 25px;"></th>
+                    <th style="width: 25px;"></th>
+                    <th>Versão</th>
+                    <th>Status</th>
+                    <th>Changelog</th>
+                    <th>Criação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for versao in versoes %}
+                <tr>
+                    <td>
+                        <button type="submit" form="edit-form-{{ versao.ID_V }}" id="save-button-{{ versao.ID_V }}" class="btn btn-success" style="display: none; font-size: 10px; padding: 0.5px 4px;">Salvar</button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-warning" style="font-size: 10px; padding: 0.5px 4px;" onclick="toggleEdit2('{{ versao.ID_V }}')">Editar</button>
+                    </td>                   
+                    <td>
+                        <form action="{{ url_for('BOM.Exclui_Versao', bom_id=versao.ID_V) }}" method="POST" style="display: inline;">
+                            <button type="submit" style="font-size: 10px; padding: 0.5px 4px" class="btn btn-danger"><strong>X</strong></button>
+                        </form>
+                    </td>
+                    <td>{{ versao.Versao }}</td>
+                    <td>
+                        <form action="{{ url_for('BOM.edit_versao_BOM', bom_id=versao.ID_V) }}" method="POST" id="edit-form-{{ versao.ID_V }}" style="display: inline;">
+                            <span id="status-text-{{ versao.ID_V }}">
+                                {% if versao.Status == 'Liberado' %}
+                                    🟢
+                                {% elif versao.Status == 'EOL' %}
+                                    🟡
+                                {% elif versao.Status == 'Não Liberado' %}
+                                    🔴
+                                {% else %}
+                                    {{ versao.Status }}
+                                {% endif %}
+                            </span>
+                            <input type="text" id="status-input-{{ versao.ID_V }}" name="new_status" value="{{ versao.Status }}" style="display: none; width: 150px; text-align: center;">
+                        </form>
+
+                        <!-- {% if versao.Status == 'Liberado' %}
+                            🟢
+                        {% elif versao.Status == 'EOL' %}
+                            🟡
+                        {% elif versao.Status == 'Não Liberado' %}
+                            🔴
+                        {% endif %} -->
+                    </td>
+                    <td>{{ versao.Changelog }}</td>
+                    <td>{{ versao.Data_Cri }}</td>
+                </tr>
+                
+                {% else %}
+                    <tr>
+                        <td colspan="5">-</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 
@@ -29,37 +104,56 @@
         <form method="POST" action="{{ url_for('BOM.add_BOMs') }}" enctype="multipart/form-data">
             <label for="file" class="form-label">Selecione um arquivo Excel:</label>
             <input type="file" name="file" id="file" accept=".xlsx" required class="form-input">
-            <button type="submit" class="btn btn-outline-success">Enviar</button>
+            <div class="button-container"style="display: flex; justify-content: flex-end; margin-right: 25.5px;">
+                <button type="submit" class="btn btn-outline-success">Enviar</button>
+            </div>
         </form>
     </div>
 
     <!-- Formulário para envio manual de dados -->
     <div class="right-side-2">
-        <p class="form-description">Preencha os dados do novo BOM:</p>
+        <p class="form-description">Preencha os dados da nova linha:</p>
         <form method="POST" action="{{ url_for('BOM.add_BOMs') }}">
-            <label for="new_placa" class="form-label">Placa:</label>
-            <input type="text" name="new_placa" required class="form-input"><br>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="new_placa" class="form-label">Placa:</label>
+                    <input type="text" name="new_placa" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="new_versao" class="form-label">Versão:</label>
+                    <input type="text" name="new_versao" required class="form-input">
+                </div>
+            </div>
 
-            <label for="new_versao" class="form-label">Versão:</label>
-            <input type="text" name="new_versao" required class="form-input"><br>
-
-            <label for="new_status" class="form-label">Status:</label>
-            <input type="text" name="new_status" required class="form-input"><br>
-
-            <label for="new_componente" class="form-label">Componente:</label>
-            <input type="text" name="new_componente" required class="form-input"><br>
-
-            <label for="new_quantidade" class="form-label">Quantidade:</label>
-            <input type="number" name="new_quantidade" required class="form-input"><br>
-
-            <label for="new_designator" class="form-label">Designador:</label>
-            <input type="text" name="new_designator" required class="form-input"><br>
-
-            <button type="submit" class="btn btn-outline-success">Enviar</button>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="new_quantidade" class="form-label">Quantidade:</label>
+                    <input type="number" name="new_quantidade" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="new_designator" class="form-label">Designador:</label>
+                    <input type="text" name="new_designator" required class="form-input">
+                </div>
+            </div>
+    
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="new_componente" class="form-label">Componente:</label>
+                    <input type="text" name="new_componente" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="new_status" class="form-label">Status:</label>
+                    <input type="text" name="new_status" required class="form-input" disabled>
+                </div>
+            </div>
+            
+                <div class="button-container"style="display: flex; justify-content: flex-end; margin-right: 25.5px;">
+                    <button type="submit" class="btn btn-outline-success">Enviar</button>
+                </div>
         </form>
     </div>
-
     <!-- Menu e Flash -->
     {% include 'menu.html' %}
+    <script src="../static/js_zaire/salvar_edit.js"></script>
 </body>
 </html>

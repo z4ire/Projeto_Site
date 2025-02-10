@@ -48,7 +48,7 @@
                         <button type="button" class="btn btn-warning px-1 py-0" onclick="toggleEdit('{{ itens[0].ID }}')">Editar</button>
                     </td>
                     <td rowspan="{{ itens|length }}">
-                        <form action="{{ url_for('BOM.form_delete_BOM', bom_id=itens[0].ID) }}" method="POST" style="display: inline;">
+                        <form action="{{ url_for('BOM.Exclui_Componente', bom_id=itens[0].ID) }}" method="POST" style="display: inline;">
                             <button type="submit" class="btn btn-danger px-1 py-0"><strong>X</strong></button>
                         </form>
                     </td>
@@ -60,9 +60,9 @@
                         {{ itens[0].Status }}
                     </td>
                     <td rowspan="{{ itens|length }}">
-                        <form action="{{ url_for('BOM.form_edit_BOM', bom_id=itens[0].ID) }}" method="POST" id="edit-form-{{ itens[0].ID }}" style="display: inline;">
+                        <form action="{{ url_for('BOM.edit_componente_BOM', bom_id=itens[0].ID) }}" method="POST" id="edit-form-{{ itens[0].ID }}" style="display: inline;">
                             <span id="componente-text-{{ itens[0].ID }}">{{ itens[0].Componente }}</span>
-                                    <input type="text" id="componente-input-{{ itens[0].ID }}" name="new_componente" value="{{ itens[0].Componente }}" style="display: none;">
+                            <input type="text" id="componente-input-{{ itens[0].ID }}" name="new_componente" value="{{ itens[0].Componente }}" style="display: none;">
                         </form>
                     </td>
                     <td rowspan="{{ itens|length }}">

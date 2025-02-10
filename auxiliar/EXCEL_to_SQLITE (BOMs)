@@ -19,7 +19,7 @@ def salvar_no_sqlite(df):
     # Inserir os novos dados na tabela
     for index, row in df.iterrows():
         # Criar a consulta para inserir os dados
-        query = "INSERT INTO BOMs_Placas (ID, Placa, Versao, Status, Componente, Quantidade, Designator) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        query = "INSERT INTO BOMs_Placas (ID, Placa, Versao, Componente, Quantidade, Designator) VALUES (?, ?, ?, ?, ?, ?)"
         cursor.execute(query, tuple(row))  # Garantir que os dados estão na ordem certa
 
     # Commit e fechamento da conexão

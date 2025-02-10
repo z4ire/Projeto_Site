@@ -8,7 +8,6 @@ class BOMs(db.Model):
     ID = db.Column(db.Integer, primary_key=True)
     Placa = db.Column(db.String(20))
     Versao = db.Column(db.String(4))
-    Status = db.Column(db.String(100))
     Componente = db.Column(db.String(20))
     Quantidade = db.Column(db.Integer)
     Designator = db.Column(db.String(10000))
@@ -29,10 +28,11 @@ class PNs(db.Model):
 
 class ALT(db.Model):
     __tablename__ = 'ALTERNATIVOS_SAP'
+    ID_ALT = db.Column(db.Integer, primary_key=True)
     Placa_ALT = db.Column(db.String(20))
     Comp_Princ = db.Column(db.String(20))
     Comp_Alt = db.Column(db.String(20))
-    ID_alt = db.Column(db.Integer, primary_key=True)
+
 
 class Data_Att(db.Model):
     __tablename__ = 'Metadata'
@@ -46,4 +46,5 @@ class Versionamento(db.Model):
     Versao = db.Column(db.String(4))
     Status = db.Column(db.String(20))
     Data_Cri = db.Column(db.String(20))
+    Changelog = db.Column(db.String(20))
 
