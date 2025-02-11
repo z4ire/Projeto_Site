@@ -4,7 +4,7 @@ from datetime import datetime
 from io import BytesIO
 from sqlalchemy.exc import SQLAlchemyError
 from flask import Blueprint, request, render_template, redirect, flash, url_for, Response
-from database.models.database_class import db, BOMs, OITM, PNs, ALT, Data_Att, Versionamento
+from database.models.database_class import db, BOMs, BOMs_SAP, OITM, PNs, ALT, Data_Att, Versionamento
 
 
 # Implementar:
@@ -83,6 +83,59 @@ def verificar_e_inserir_versionamento(placa, versao):
         return True  # Indica que uma nova versão foi inserida
     return False  # Indica que a versão já existe
 
+def diff_SAP(placa, v_max):
+    # Consulta na tabela BOMs
+    query1 = db.session.query(
+        BOMs.Componente, 
+        BOMs.Quantidade
+    ).filter_by(
+        Versao=v_max,  # Substitua pela versão desejada
+        Placa=placa  # Substitua pelo componente desejado
+    ).all()
+    
+    # Consulta na tabela BOMs_SAP
+    query2 = db.session.query(
+        BOMs_SAP.Componente, 
+        BOMs_SAP.Quantidade
+    ).filter_by(
+        Placa=placa  # Substitua pelo componente desejado
+    ).all()
+
+    # Remover espaços dos componentes da tabela BOMs_SAP
+    query2_sem_espacos = [
+        (row.Componente.replace(" ", ""), row.Quantidade)  # Remove todos os espaços
+        for row in query2
+    ]
+
+    # Converter os resultados em dicionários (Componente -> Quantidade) para facilitar a comparação
+    dict1 = {row.Componente: row.Quantidade for row in query1}
+    dict2 = {row[0]: row[1] for row in query2_sem_espacos}
+
+    # Encontrar componentes exclusivos em query1 (presentes em query1 mas não em query2)
+    exclusivos_query1 = [componente for componente in dict1 if componente not in dict2]
+
+    # Encontrar componentes exclusivos em query2 (presentes em query2 mas não em query1)
+    exclusivos_query2 = [componente for componente in dict2 if componente not in dict1]
+
+    # Encontrar componentes comuns com quantidades diferentes
+    comuns_com_diferencas = []
+    for componente in dict1:
+        if componente in dict2 and dict1[componente] != dict2[componente]:
+            comuns_com_diferencas.append({
+                "componente": componente,
+                "quantidade_BOMs": dict1[componente],
+                "quantidade_BOMs_SAP": dict2[componente]
+            })
+
+    # Formatar os resultados para o template
+    diff = {
+        "exclusivos_em_BOMs": [{"componente": item} for item in exclusivos_query1],
+        "exclusivos_em_BOMs_SAP": [{"componente": item} for item in exclusivos_query2],
+        "comuns_com_diferencas": comuns_com_diferencas
+    }
+
+    return diff
+
 @bp_BOM_route.route('/', methods=['GET'])
 def lista_BOMs():
     try:
@@ -103,6 +156,7 @@ def lista_BOMs():
         # Paginação
         page = request.args.get('page', 1, type=int)
         per_page = 100
+        
         resultados = query.order_by(BOMs.Placa.asc(), Versionamento.Versao.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
         # Consulta dados das placas
@@ -222,11 +276,13 @@ def versoes():
         query = query.filter(Versionamento.Placa_V == placa)
 
         # Executa a consulta
-        
         resultados = query.order_by(Versionamento.Versao.desc()).all()
 
+        v_max = resultados[0].Versao if resultados else None
 
-        return render_template('formulario_cadastro_BOM.html', versoes=resultados, placa=placa)
+        diff = diff_SAP(placa, v_max)
+
+        return render_template('formulario_cadastro_BOM.html', versoes=resultados, placa=placa, diferencas=diff, v_max=v_max)
     
     except SQLAlchemyError as e:
         logger.error(f"Erro ao consultar versões: {str(e)}")

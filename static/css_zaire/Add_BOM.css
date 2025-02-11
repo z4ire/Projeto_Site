@@ -6,9 +6,10 @@
     position: absolute;
     top: 90px;    /* Ajuste a distância do topo */
     left: 50px;  /* Ajuste a distância da direita */
-    width: 48.5%;   /* Ajuste conforme necessário */
+    width: 48.8%;   /* Ajuste conforme necessário */
     padding-top: 25px;
     padding-left: 25px;
+    padding-right: 25px;
     padding-bottom: 20px;
     background-color: #f4f4f4;
     border-radius: 8px;

@@ -12,6 +12,13 @@ class BOMs(db.Model):
     Quantidade = db.Column(db.Integer)
     Designator = db.Column(db.String(10000))
 
+class BOMs_SAP(db.Model):
+    __tablename__ = 'BOMs_SAP'
+    ID = db.Column(db.Integer, primary_key=True)
+    Placa = db.Column(db.String(20))
+    Componente = db.Column(db.String(20))
+    Quantidade = db.Column(db.Integer)
+
 class OITM(db.Model):
     __tablename__ = 'OITM_SIMPLIFICADO'
     Codigo = db.Column(db.String(20), primary_key=True)
@@ -33,7 +40,6 @@ class ALT(db.Model):
     Comp_Princ = db.Column(db.String(20))
     Comp_Alt = db.Column(db.String(20))
 
-
 class Data_Att(db.Model):
     __tablename__ = 'Metadata'
     ID_att = db.Column(db.Integer, primary_key=True)
@@ -47,4 +53,3 @@ class Versionamento(db.Model):
     Status = db.Column(db.String(20))
     Data_Cri = db.Column(db.String(20))
     Changelog = db.Column(db.String(20))
-

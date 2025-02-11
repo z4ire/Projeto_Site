@@ -8,15 +8,26 @@
 </head>
 <body>
 
+    <style>
+        .table-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .table-container table {
+            width: 49%; /* Ajuste conforme necessário */
+        }
+    </style>
+
     <div class="left-side-1">
         <form method="GET" action="{{ url_for('BOM.versoes') }}">
            
-            <input type="text" class="form-input" name="placa" value="{{ placa }}" placeholder="Digite a placa"><br><br>
-            <div class="button-container"style="display: flex; justify-content: flex-end; margin-right: 25.5px;">
+            <input style="width: 100%" type="text" name="placa" value="{{ placa }}" placeholder="Digite a placa"><br><br>
+            <div class="button-container"style="display: flex; justify-content: flex-end; margin-right: 0.5px;">
                 <button type="submit" class="btn btn-outline-success">Filtrar</button>
             </div>
         </form>
-        <table style="text-align: center; border: 1px solid black; width: 96.5%; margin-top: 20px;">
+        <table style="text-align: center; border: 1px solid black; width: 100%; margin-top: 20px;">
             <thead>
 
             </thead>
@@ -34,7 +45,7 @@
             </tbody>
         </table>
 
-        <table style="text-align: center; border: 1px solid black; width: 96.5%; margin-top: 20px;">
+        <table style="text-align: center; border: 1px solid black; width: 100%; margin-top: 20px;">
             <thead>
                 <tr>
                     <th style="width: 25px;"></th>
@@ -96,6 +107,81 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <div class="table-container">
+            <table style="text-align: center;" class="table-bordered">
+                <thead>
+                    <tr>
+                        <td colspan="2"><strong>{{ placa }} Versão {{ v_max }} - Database</strong></td>
+                    </tr>
+                    <tr>
+                        <th width="100">Componente</th>
+                        <th width="100">Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in diferencas.exclusivos_em_BOMs %}
+                        <tr>
+                            <td>{{ item.componente }}</td>
+                            <td>{{ item.quantidade }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2">Nenhum componente exclusivo encontrado.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <table style="text-align: center;" class="table-bordered">
+                <thead>
+                    <tr>
+                        <td colspan="2"><strong>{{ placa }} - SAP</strong></td>
+                    </tr>
+                    <tr>
+                        <th width="100">Componente</th>
+                        <th width="100">Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in diferencas.exclusivos_em_BOMs_SAP %}
+                        <tr>
+                            <td>{{ item.componente }}</td>
+                            <td>{{ item.quantidade }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2">Nenhum componente exclusivo encontrado.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <table style="text-align: center; width: 100%; margin-top: 20px;" class="table-bordered">
+            <thead>
+                <td colspan="3"><strong>Diferença de Quantidade</strong></td>
+                <tr>
+                    <th width="150">Componente</th>
+                    <th width="180">Quantidade Database</th>
+                    <th width="180">Quantidade SAP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in diferencas.comuns_com_diferencas %}
+                    <tr>
+                        <td>{{ item.componente }}</td>
+                        <td>{{ item.quantidade_BOMs }}</td>
+                        <td>{{ item.quantidade_BOMs_SAP }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3">Nenhum componente comum com diferenças de quantidade encontrado.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
     </div>
 
     <!-- Formulário para envio de dados via Excel -->
