@@ -2,15 +2,16 @@ import pandas as pd
 import logging
 from datetime import datetime
 from io import BytesIO
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy import func
 from flask import Blueprint, request, render_template, redirect, flash, url_for, Response
 from database.models.database_class import db, BOMs, BOMs_SAP, OITM, PNs, ALT, Data_Att, Versionamento
 
 
 # Implementar:
 #     Tela de confirmação de exclusão de linha.
-#     Tela com changelog
-#     Ajustar tela de adição de linha/BOM
+#     Adicionar descrição dos componentes na tela de comparação
+#     Adicionar botão para baixar lista de alternativos.
 #     Barra de carregamento para BOMs (Contato em tempo real entre back e front)
 #     Solicitar ao TI o espelhamento dos campos de descrição e quantidade da tela de alternativos do SAP
 
@@ -43,6 +44,22 @@ def constroi_consulta_base():
 .join(Versionamento, (BOMs.Placa == Versionamento.Placa_V) & (BOMs.Versao == Versionamento.Versao)) \
 .join(PNs, BOMs.Componente == PNs.Codigo_PN, isouter=True)
 
+def constroi_consulta_versoes(placa):
+
+    return  db.session.query(
+            Versionamento.ID_V,
+            Versionamento.Placa_V,
+            Versionamento.Versao,
+            Versionamento.Status,
+            Versionamento.Data_Cri,
+            Versionamento.Changelog,
+            Versionamento.Observacoes,
+            Versionamento.Eng_Resp,
+            Versionamento.Data_Att,
+            Versionamento.GPD_Resp,
+            OITM.Descricao
+        ).join(OITM, Versionamento.Placa_V == OITM.Codigo).filter(Versionamento.Placa_V == placa).order_by(Versionamento.Versao.desc()).all()
+    
 def aplica_filtros(query, placa: list, versao: list, status: list, componente: list):
     """Aplica filtros à consulta base."""
     filtros = []
@@ -75,62 +92,70 @@ def verificar_e_inserir_versionamento(placa, versao):
     Verifica se a combinação de placa e versão já existe na tabela de versionamento.
     Se não existir, insere uma nova entrada.
     """
-    existing_version = Versionamento.query.filter_by(Placa_V=placa, Versao=versao).first()
-    if not existing_version:
-        new_version = Versionamento(Placa_V=placa, Versao=versao, Data_Cri = datetime.now().strftime('%d/%m/%Y'))
+    try:
+        new_version = Versionamento(Placa_V=placa, Versao=versao, Data_Cri=datetime.now().strftime('%d/%m/%Y'), Data_Att=datetime.now().strftime('%d/%m/%Y'))
         db.session.add(new_version)
         db.session.commit()
+        flash('Dados carregados com sucesso.', 'success')
         return True  # Indica que uma nova versão foi inserida
-    return False  # Indica que a versão já existe
+    except IntegrityError:
+        db.session.rollback()
+        flash('Já existe esta combinação de placa-versao.', 'success')
+        return False  # Indica que a versão já existe
 
-def diff_SAP(placa, v_max):
-    # Consulta na tabela BOMs
-    query1 = db.session.query(
-        BOMs.Componente, 
-        BOMs.Quantidade
-    ).filter_by(
-        Versao=v_max,  # Substitua pela versão desejada
-        Placa=placa  # Substitua pelo componente desejado
-    ).all()
-    
-    # Consulta na tabela BOMs_SAP
-    query2 = db.session.query(
-        BOMs_SAP.Componente, 
-        BOMs_SAP.Quantidade
-    ).filter_by(
-        Placa=placa  # Substitua pelo componente desejado
-    ).all()
+def diff_SAP(placa, v_max, version_a, version_b):
 
-    # Remover espaços dos componentes da tabela BOMs_SAP
-    query2_sem_espacos = [
-        (row.Componente.replace(" ", ""), row.Quantidade)  # Remove todos os espaços
-        for row in query2
+    def fetch_bom_data(version, placa, is_sap=False):
+        if is_sap:
+            query = db.session.query(func.replace(BOMs_SAP.Componente, ' ', '').label('Componente'),  # Remover espaços antes do join
+            BOMs_SAP.Quantidade,
+            OITM.Descricao).filter(BOMs_SAP.Placa == placa).join(OITM, func.replace(BOMs_SAP.Componente, ' ', '') == OITM.Codigo).all()
+
+        else:
+            query = db.session.query(
+                BOMs.Componente, 
+                BOMs.Quantidade,
+                OITM.Descricao
+            ).join(OITM, BOMs.Componente == OITM.Codigo).filter(BOMs.Versao == version, BOMs.Placa == placa).all()
+
+        # Retorna uma lista de tuplas (componente, quantidade, descrição)
+        return [(row.Componente.replace(" ", ""), row.Quantidade, row.Descricao) for row in query]
+
+    # Obter os dados das versões
+    bom_data_a = fetch_bom_data(version_a, placa, is_sap=(version_a == 'SAP'))
+    bom_data_b = fetch_bom_data(version_b, placa, is_sap=(version_b == 'SAP'))
+
+    # Criar dicionários {componente: (quantidade, descrição)}
+    dict_a = {component: (quantity, description) for component, quantity, description in bom_data_a}
+    dict_b = {component: (quantity, description) for component, quantity, description in bom_data_b}
+
+    # Componentes exclusivos em BOMs
+    exclusive_in_a = [
+        {"componente": componente, "quantidade": dict_a[componente][0], "descricao": dict_a[componente][1]}
+        for componente in dict_a if componente not in dict_b
     ]
 
-    # Converter os resultados em dicionários (Componente -> Quantidade) para facilitar a comparação
-    dict1 = {row.Componente: row.Quantidade for row in query1}
-    dict2 = {row[0]: row[1] for row in query2_sem_espacos}
+    # Componentes exclusivos em BOMs_SAP
+    exclusive_in_b = [
+        {"componente": componente, "quantidade": dict_b[componente][0], "descricao": dict_b[componente][1]}
+        for componente in dict_b if componente not in dict_a
+    ]
 
-    # Encontrar componentes exclusivos em query1 (presentes em query1 mas não em query2)
-    exclusivos_query1 = [componente for componente in dict1 if componente not in dict2]
-
-    # Encontrar componentes exclusivos em query2 (presentes em query2 mas não em query1)
-    exclusivos_query2 = [componente for componente in dict2 if componente not in dict1]
-
-    # Encontrar componentes comuns com quantidades diferentes
+    # Componentes comuns com quantidades diferentes
     comuns_com_diferencas = []
-    for componente in dict1:
-        if componente in dict2 and dict1[componente] != dict2[componente]:
+    for componente in dict_a:
+        if componente in dict_b and dict_a[componente][0] != dict_b[componente][0]:
             comuns_com_diferencas.append({
                 "componente": componente,
-                "quantidade_BOMs": dict1[componente],
-                "quantidade_BOMs_SAP": dict2[componente]
+                "quantidade_BOMs": dict_a[componente][0],
+                "quantidade_BOMs_SAP": dict_b[componente][0],
+                "descricao": dict_a[componente][1]  # Ambas as listas usam a mesma descrição
             })
 
-    # Formatar os resultados para o template
+    # Retornar o resultado formatado
     diff = {
-        "exclusivos_em_BOMs": [{"componente": item} for item in exclusivos_query1],
-        "exclusivos_em_BOMs_SAP": [{"componente": item} for item in exclusivos_query2],
+        "exclusivos_em_BOMs": exclusive_in_a,
+        "exclusivos_em_BOMs_SAP": exclusive_in_b,
         "comuns_com_diferencas": comuns_com_diferencas
     }
 
@@ -156,7 +181,7 @@ def lista_BOMs():
         # Paginação
         page = request.args.get('page', 1, type=int)
         per_page = 100
-        
+
         resultados = query.order_by(BOMs.Placa.asc(), Versionamento.Versao.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
         # Consulta dados das placas
@@ -241,7 +266,7 @@ def add_BOMs():
                 # Adiciona o novo BOM ao banco de dados
                 db.session.add(new_BOM)
                 db.session.commit()
-                flash('Dados carregados com sucesso.', 'success')
+                
             else:  
                 flash('Nem todos os campos foram preenchidos', 'success')
         else:
@@ -253,16 +278,6 @@ def add_BOMs():
 def versoes():
     """Lista as versões das placas cadastradas."""
     try:
-        # Constrói a consulta base
-        query = db.session.query(
-            Versionamento.ID_V,
-            Versionamento.Placa_V,
-            Versionamento.Versao,
-            Versionamento.Status,
-            Versionamento.Data_Cri,
-            Versionamento.Changelog,
-            OITM.Descricao
-        ).join(OITM, Versionamento.Placa_V == OITM.Codigo)
 
         placa = processa_parametro(request.args.get('placa', ''))
 
@@ -272,17 +287,22 @@ def versoes():
         else:
             placa = ''  # Ou outro valor padrão, se a lista estiver vazia
 
-        # Filtra por placa, se fornecida
-        query = query.filter(Versionamento.Placa_V == placa)
-
         # Executa a consulta
-        resultados = query.order_by(Versionamento.Versao.desc()).all()
+        resultados = constroi_consulta_versoes(placa)
 
         v_max = resultados[0].Versao if resultados else None
 
-        diff = diff_SAP(placa, v_max)
+        try:
+            Va = processa_parametro(request.args.get('Va', ''))[0]
+            Vb = processa_parametro(request.args.get('Vb', ''))[0]
+        
+        except (IndexError, TypeError):
+            Va = v_max
+            Vb = v_max
 
-        return render_template('formulario_cadastro_BOM.html', versoes=resultados, placa=placa, diferencas=diff, v_max=v_max)
+        diff = diff_SAP(placa, v_max, Va, Vb)
+
+        return render_template('formulario_cadastro_BOM.html', versoes=resultados, placa=placa, diferencas=diff, v_max=v_max, Va=Va, Vb=Vb)
     
     except SQLAlchemyError as e:
         logger.error(f"Erro ao consultar versões: {str(e)}")
@@ -291,6 +311,7 @@ def versoes():
     except Exception as e:
         logger.error(f"Erro inesperado ao consultar versões: {str(e)}")
         flash("Ocorreu um erro inesperado. Tente novamente.", "error")
+        print("Mensagem de erro:", e)
         return redirect(url_for('BOM.lista_BOMs'))
 
 @bp_BOM_route.route('/alt', methods=['GET'])
@@ -353,7 +374,9 @@ def Exclui_Componente(bom_id):
 
 @bp_BOM_route.route('/delete/versao/<bom_id>', methods=['POST'])
 def Exclui_Versao(bom_id):
+    
     """Exclui um BOM com base no ID."""
+    print(f'ID recebido: {bom_id}')
     try:
         linha = Versionamento.query.get(bom_id)
         if linha:
@@ -378,12 +401,14 @@ def Exclui_Versao(bom_id):
 def download_BOM(placa):
     # Refaça a consulta para este caso específico da placa
     try:
-        query = constroi_consulta_base().filter(BOMs.Placa == placa)
+        query = constroi_consulta_base()
+
+        query = query.filter(BOMs.Placa == placa)
         baixar = query.all()
 
         # Converte os dados para DataFrame
         df = pd.DataFrame(baixar, columns=[
-            "ID", "Placa", "Versao", "Status", "Componente", "Quantidade", "Designator",
+            "ID", "Placa", "Versao", "Versão", "Componente", "Quantidade", "Designator",
             "Descricao", "Fabricante", "PN", "Status_PN"
         ])
 
@@ -402,12 +427,14 @@ def download_BOM(placa):
 
 #EDIÇÃO DE COMPONENTE DE UMA BOM
 @bp_BOM_route.route('/edit/componente/<bom_id>', methods=['POST'])
-def edit_componente_BOM(bom_id):
+def edit_BOM(bom_id):
     """Edita um BOM com base no ID."""
     try:
         linha = BOMs.query.get(bom_id)
         if linha:
             linha.Componente = request.form['new_componente']
+            linha.Quantidade = request.form['new_quantidade']
+            linha.Designator = request.form['new_designator']
             db.session.commit()
             flash("Item modificado com sucesso.", "success")
         else:
@@ -425,6 +452,11 @@ def edit_versao_BOM(bom_id):
         linha = Versionamento.query.get(bom_id)
         if linha:
             linha.Status = request.form['new_status']
+            linha.Changelog = request.form['new_changelog']
+            linha.Eng_Resp = request.form['new_eng']
+            linha.GPD_Resp = request.form['new_gpd']
+            linha.Data_Att = request.form['new_data_att']
+            linha.Observacoes = request.form['new_obs']
             db.session.commit()
             flash("Versão modificada com sucesso.", "success")
         else:
@@ -434,3 +466,43 @@ def edit_versao_BOM(bom_id):
         logger.error(f"Erro ao editar BOM: {str(e)}")
         flash("Erro ao modificar o item. Tente novamente.", "error")
     return redirect(request.referrer or url_for('home'))
+
+@bp_BOM_route.route('/old', methods=['GET'])
+def versoes2():
+    """Lista as versões das placas cadastradas."""
+    try:
+
+        placa = processa_parametro(request.args.get('placa', ''))
+
+        # Verifica se a lista não está vazia antes de tentar acessar o primeiro item
+        if placa:
+            placa = placa[0]  # Acessa o primeiro item, se a lista não estiver vazia
+        else:
+            placa = ''  # Ou outro valor padrão, se a lista estiver vazia
+
+        # Executa a consulta
+        resultados = constroi_consulta_versoes(placa)
+
+        v_max = resultados[0].Versao if resultados else None
+
+        try:
+            Va = processa_parametro(request.args.get('Va', ''))[0]
+            Vb = processa_parametro(request.args.get('Vb', ''))[0]
+
+        except (IndexError, TypeError):
+            Va = v_max
+            Vb = v_max
+            
+        diff = diff_SAP(placa, v_max, Va, Vb)
+
+        return render_template('add_bom.html', versoes=resultados, placa=placa, diferencas=diff, v_max=v_max, Va=Va, Vb=Vb)
+    
+    except SQLAlchemyError as e:
+        logger.error(f"Erro ao consultar versões: {str(e)}")
+        flash("Ocorreu um erro ao consultar as versões. Tente novamente.", "error")
+        return redirect(url_for('BOM.lista_BOMs'))
+    except Exception as e:
+        logger.error(f"Erro inesperado ao consultar versões: {str(e)}")
+        flash("Ocorreu um erro inesperado. Tente novamente.", "error")
+        print("Mensagem de erro:", e)
+        return redirect(url_for('BOM.lista_BOMs'))

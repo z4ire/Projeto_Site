@@ -48,8 +48,17 @@ class Data_Att(db.Model):
 class Versionamento(db.Model):
     __tablename__ = 'Versionamento'
     ID_V = db.Column(db.Integer, primary_key=True)
-    Placa_V = db.Column(db.String(20))
-    Versao = db.Column(db.String(4))
-    Status = db.Column(db.String(20))
-    Data_Cri = db.Column(db.String(20))
-    Changelog = db.Column(db.String(20))
+    Placa_V = db.Column(db.String(50), nullable=False)  # Tamanho corrigido para 50
+    Versao = db.Column(db.String(50), nullable=False)   # Tamanho corrigido para 50
+    Status = db.Column(db.String(50))                  # Tamanho corrigido para 50
+    Data_Cri = db.Column(db.String(10), nullable=False)
+    Changelog = db.Column(db.String(50))               # Tamanho corrigido para 50
+    Observacoes = db.Column(db.String(50))
+    Eng_Resp = db.Column(db.String(50))
+    Data_Att = db.Column(db.String(50), nullable=False)
+    GPD_Resp = db.Column(db.String(50))
+
+    # Define a restrição de unicidade
+    __table_args__ = (
+        db.UniqueConstraint('Placa_V', 'Versao', name='uq_placa_versao'),
+    )

@@ -1,35 +1,85 @@
 function toggleEdit(id) {
-    var textElement = document.getElementById('componente-text-' + id);
-    var inputElement = document.getElementById('componente-input-' + id);
+    var textElement_componente = document.getElementById('componente-text-' + id);
+    var textElement_quantidade = document.getElementById('quantidade-number-' + id);
+    var textElement_designator = document.getElementById('designator-text-' + id);
+    var inputElement_quantidade = document.getElementById('componente-input-' + id);
+    var inputElement_componente = document.getElementById('quantidade-input-' + id);
+    var inputElement_designator = document.getElementById('designator-input-' + id);
     var saveButton = document.getElementById('save-button-' + id);
     
     // Alterna entre mostrar o texto e o campo de entrada
-    if (inputElement.style.display === "none") {
-        textElement.style.display = "none";
-        inputElement.style.display = "inline";
+    if (inputElement_componente.style.display === "none") {
+        textElement_componente.style.display = "none";
+        textElement_quantidade.style.display = "none";
+        textElement_designator.style.display = "none";
+        inputElement_quantidade.style.display = "inline";
+        inputElement_componente.style.display = "inline";
+        inputElement_designator.style.display = "inline";
         saveButton.style.display = "inline";  // Mostrar o botão de salvar
     } else {
-        textElement.style.display = "inline";
-        inputElement.style.display = "none";
+        textElement_componente.style.display = "inline";
+        textElement_quantidade.style.display = "inline";
+        textElement_designator.style.display = "inline";
+        inputElement_quantidade.style.display = "none";
+        inputElement_componente.style.display = "none";
+        inputElement_designator.style.display = "none";
         saveButton.style.display = "none";  // Esconder o botão de salvar
     }
 }
 
+
 function toggleEdit2(id) {
-    var statusTextElement = document.getElementById('status-text-' + id);  // Elemento que exibe o texto do status
-    var statusInputElement = document.getElementById('status-input-' + id);  // Elemento de entrada de texto para edição do status
-    var saveButton = document.getElementById('save-button-' + id);  // Botão de salvar
+    var TextElement_status = document.getElementById('status-text-' + id);
+    var TextElement_changelog = document.getElementById('changelog-text-' + id);
+    var TextElement_eng_resp = document.getElementById('eng-text-' + id);
+    var TextElement_gpd_resp = document.getElementById('gpd-text-' + id);
+    var TextElement_data_att = document.getElementById('data-att-text-' + id);
+    var TextElement_obs = document.getElementById('obs-text-' + id);
+    var InputElement_status = document.getElementById('status-input-' + id);
+    var InputElement_changelog = document.getElementById('changelog-input-' + id);
+    var InputElement_eng_resp = document.getElementById('eng-input-' + id);
+    var InputElement_gpd_resp = document.getElementById('gpd-input-' + id);
+    var InputElement_data_att = document.getElementById('data-att-input-' + id);
+    var InputElement_obs = document.getElementById('obs-input-' + id);
+    
+    var saveButton = document.getElementById('save-button-' + id);
+    
     
     // Alterna entre mostrar o texto e o campo de entrada para o status
-    if (statusInputElement.style.display === "none") {
-        statusTextElement.style.display = "none";  // Esconde o texto do status
-        statusInputElement.style.display = "inline";  // Exibe o campo de entrada para edição
-        saveButton.style.display = "inline";  // Exibe o botão de salvar
+    if (InputElement_status.style.display === "none") {
+
+        TextElement_status.style.display = "none";
+        TextElement_changelog.style.display = "none";
+        TextElement_eng_resp.style.display = "none";
+        TextElement_gpd_resp.style.display = "none";
+        TextElement_data_att.style.display = "none";
+        TextElement_obs.style.display = "none";
+
+        InputElement_status.style.display = "inline";
+        InputElement_changelog.style.display = "inline";
+        InputElement_eng_resp.style.display = "inline";
+        InputElement_gpd_resp.style.display = "inline";
+        InputElement_data_att.style.display = "inline";
+        InputElement_obs.style.display = "inline";
+
+        saveButton.style.display = "inline";
 
     } else {
-        statusTextElement.style.display = "inline";  // Exibe o texto do status novamente
-        statusInputElement.style.display = "none";  // Esconde o campo de entrada
-        saveButton.style.display = "none";  // Esconde o botão de salvar
+        TextElement_status.style.display = "inline";
+        TextElement_changelog.style.display = "inline";
+        TextElement_eng_resp.style.display = "inline";
+        TextElement_gpd_resp.style.display = "inline";
+        TextElement_data_att.style.display = "inline";
+        TextElement_obs.style.display = "inline";
+
+        InputElement_status.style.display = "none";
+        InputElement_changelog.style.display = "none";
+        InputElement_eng_resp.style.display = "none";
+        InputElement_gpd_resp.style.display = "none";
+        InputElement_data_att.style.display = "none";
+        InputElement_obs.style.display = "none";
+
+        saveButton.style.display = "none"; 
     }
 }
 

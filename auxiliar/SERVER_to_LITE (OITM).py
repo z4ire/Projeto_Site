@@ -51,6 +51,9 @@ WHERE [cod-item] LIKE '7.%'
    OR [cod-item] LIKE '8.%' 
    OR [cod-item] LIKE '9.%'
    OR [cod-item] LIKE '6.%'
+   OR [cod-item] LIKE 'SUB%'
+   OR [desc-item] LIKE '%PEND%'
+                         
 ORDER BY [cod-item]
 """)
 

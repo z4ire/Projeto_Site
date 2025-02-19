@@ -59,21 +59,27 @@
                     <td rowspan="{{ itens|length }}">
                         {{ itens[0].Status }}
                     </td>
-                    <td rowspan="{{ itens|length }}">
-                        <form action="{{ url_for('BOM.edit_componente_BOM', bom_id=itens[0].ID) }}" method="POST" id="edit-form-{{ itens[0].ID }}" style="display: inline;">
+                    <form action="{{ url_for('BOM.edit_BOM', bom_id=itens[0].ID) }}" method="POST" id="edit-form-{{ itens[0].ID }}">
+                        <td rowspan="{{ itens|length }}">
                             <span id="componente-text-{{ itens[0].ID }}">{{ itens[0].Componente }}</span>
                             <input type="text" id="componente-input-{{ itens[0].ID }}" name="new_componente" value="{{ itens[0].Componente }}" style="display: none;">
-                        </form>
-                    </td>
-                    <td rowspan="{{ itens|length }}">
-                        {{ itens[0].Descricao }}
-                    </td>
-                    <td rowspan="{{ itens|length }}">
-                        {{ itens[0].Quantidade }}
-                    </td>
-                    <td rowspan="{{ itens|length }}">
-                        {{ itens[0].Designator|truncate(10) }}
-                    </td>
+                        </td>
+                        <td rowspan="{{ itens|length }}">
+                            {{ itens[0].Descricao }}
+                        </td>
+    
+                        <td rowspan="{{ itens|length }}">
+                            <span id="quantidade-number-{{ itens[0].ID }}">{{ itens[0].Quantidade }}</span>
+                            <input type="number" id="quantidade-input-{{ itens[0].ID }}" name="new_quantidade" value="{{ itens[0].Quantidade }}" style="display: none;">
+                        </td>
+
+                        <td rowspan="{{ itens|length }}">
+                            <span id="designator-text-{{ itens[0].ID }}">{{ itens[0].Designator|truncate(100) }}</span>
+                            <input type="text" id="designator-input-{{ itens[0].ID }}" name="new_designator" value="{{ itens[0].Designator }}" style="display: none;">
+                        </td>
+
+                    </form>
+                    
                     <td>{{ itens[0].Fabricante }}</td>
                     <td>{{ itens[0].PN }}</td>
                     <td>{{ itens[0].Status_PN }}</td>

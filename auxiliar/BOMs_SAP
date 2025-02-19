@@ -48,12 +48,12 @@ if dados_sqlserver:
     # print("Dados recuperados do SQL Server:", dados_sqlserver)
 
     # Limpar a tabela antes de inserir os novos dados
-    # Deleta todos os registros da tabela 'BOMs_Placas_SAP' no banco de dados SQLite para garantir que a tabela esteja limpa.
+    # Deleta todos os registros da tabela 'BOMs_SAP' no banco de dados SQLite para garantir que a tabela esteja limpa.
     # Isso é feito antes de inserir novos dados para evitar duplicações ou inconsistências.
-    cursor_sqlite.execute('DELETE FROM BOMs_Placas_SAP')
+    cursor_sqlite.execute('DELETE FROM BOMs_SAP')
 
     # Inserir os novos dados na tabela
-    # A função executemany() é usada para inserir múltiplas linhas de dados na tabela 'BOMs_Placas_SAP' no SQLite.
+    # A função executemany() é usada para inserir múltiplas linhas de dados na tabela 'BOMs_SAP' no SQLite.
     # O formato '?' é um placeholder, que será substituído pelos valores de 'dados_sqlserver'.
     dados_sqlserver_convertido = [
         (placa, componente, float(quantidade))  # Convertendo a quantidade para float
@@ -61,7 +61,7 @@ if dados_sqlserver:
     ]
 
     cursor_sqlite.executemany('''
-        INSERT INTO BOMs_Placas_SAP (Placa, Componente, Quantidade)
+        INSERT INTO BOMs_SAP (Placa, Componente, Quantidade)
         VALUES (?, ?, ?)
     ''', dados_sqlserver_convertido)
 

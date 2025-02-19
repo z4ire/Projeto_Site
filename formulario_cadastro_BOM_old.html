@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css_zaire/Add_BOM.css">
+    <title>Document</title>
+</head>
+<body>
+
+    <style>
+        .table-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .table-container table {
+            width: 49%; /* Ajuste conforme necessário */
+        }
+    </style>
+
+    <div class="left-side-1">
+        <form method="GET" action="{{ url_for('BOM.versoes') }}">
+           
+            <input style="width: 100%" type="text" name="placa" value="{{ placa }}" placeholder="Digite a placa"><br><br>
+            <div class="button-container"style="display: flex; justify-content: flex-end; margin-right: 0.5px;">
+                <button type="submit" class="btn btn-outline-info">Filtrar</button>
+            </div>
+
+            <table class="table-bordered" style="text-align: center; border: 1px solid black; width: 100%; margin-top: 20px;">
+                <thead>
+    
+                </thead>
+                <tbody>
+                    {% if versoes %}
+                        <tr>
+                            <td>{{ versoes[0].Placa_V }}</td> <!-- Exibe a Placa uma vez -->
+                            <td>{{ versoes[0].Descricao }}</td> <!-- Exibe a Descrição uma vez -->
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2">-</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+    
+            <table style="text-align: center; border: 1px solid black; width: 100%; margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th style="width: 25px;"></th>
+                        <th style="width: 25px;"></th>
+                        <th style="width: 25px;"></th>
+                        <th style="width: 25px;"></th>
+                        <th>Versão</th>
+                        <th>Status</th>
+                        <th>Changelog</th>
+                        <th>Data Criação</th>
+                        <th>Eng. Resp.</th>
+                        <th>GPD Resp.</th>
+                        <th>Data Att.</th>
+                        <th>Obs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for versao in versoes %}
+                    <tr>
+                        <td>
+                            <button type="submit" form="edit-form-{{ versao.ID_V }}" id="save-button-{{ versao.ID_V }}" class="btn btn-success" style="display: none; font-size: 10px; padding: 0.5px 4px;">Salvar</button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-warning" style="font-size: 10px; padding: 0.5px 4px;" onclick="toggleEdit2('{{ versao.ID_V }}')">Editar</button>
+                        </td>                   
+                        <td>
+                            <form action="{{ url_for('BOM.Exclui_Versao', bom_id=versao.ID_V) }}" method="POST" style="display: none">
+                                <button type="submit" style="font-size: 10px; padding: 0.5px 4px" class="btn btn-danger"><strong>X</strong></button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="{{ url_for('BOM.Exclui_Versao', bom_id=versao.ID_V) }}" method="POST" style="display: inline;">
+                                <button type="submit" style="font-size: 10px; padding: 0.5px 4px" class="btn btn-danger"><strong>X2</strong></button>
+                            </form>
+                        </td>
+                        <td>
+                            {% if versao.Versao == v_max %}
+                                {{ versao.Versao }} (SAP)
+                            {% else %}
+                                {{ versao.Versao }}
+                            {% endif %}
+                        </td>
+                        
+                        <form action="{{ url_for('BOM.edit_versao_BOM', bom_id=versao.ID_V) }}" method="POST" id="edit-form-{{ versao.ID_V }}">
+                            <td>
+                                <span id="status-text-{{ versao.ID_V }}">
+                                    {% if versao.Status == 'Liberado' %}
+                                        🟢
+                                    {% elif versao.Status == 'EOL' %}
+                                        🟡
+                                    {% elif versao.Status == 'Não Liberado' %}
+                                        🔴
+                                    {% else %}
+                                        {{ versao.Status }}
+                                    {% endif %}
+                                </span>
+                                <input type="text" id="status-input-{{ versao.ID_V }}" name="new_status" value="{{ versao.Status }}" style="display: none; width: 150px; text-align: center;">
+                            </td>
+                            
+                            <td>
+                                <span id="changelog-text-{{ versao.ID_V }}">{{ versao.Changelog }}</span>
+                                <input type="text" id="changelog-input-{{ versao.ID_V }}" name="new_changelog" value="{{ versao.Changelog }}" style="display: none; width: 150px; text-align: center;">
+                            </td>
+                            
+                            <td>{{ versao.Data_Cri }}</td>
+
+                            <td>
+                                <span id="eng-text-{{ versao.ID_V }}">{{ versao.Eng_Resp }}</span>
+                                <input type="text" id="eng-input-{{ versao.ID_V }}" name="new_eng" value="{{ versao.Eng_Resp }}" style="display: none; width: 150px; text-align: center;">
+                            </td>
+
+                            <td>
+                                <span id="gpd-text-{{ versao.ID_V }}">{{ versao.GPD_Resp }}</span>
+                                <input type="text" id="gpd-input-{{ versao.ID_V }}" name="new_gpd" value="{{ versao.GPD_Resp }}" style="display: none; width: 150px; text-align: center;">
+                            </td>
+
+                            <td>
+                                <span id="data-att-text-{{ versao.ID_V }}">{{ versao.Data_Att }}</span>
+                                <input type="text" id="data-att-input-{{ versao.ID_V }}" name="new_data_att" value="{{ versao.Data_Att }}" style="display: none; width: 150px; text-align: center;">
+                            </td>
+
+                            <td>
+                                <span id="obs-text-{{ versao.ID_V }}">{{ versao.Observacoes }}</span>
+                                <input type="text" id="obs-input-{{ versao.ID_V }}" name="new_obs" value="{{ versao.Observacoes }}" style="display: none; width: 150px; text-align: center;">
+                            </td>
+                        </form>
+                        
+                    </tr>
+                    
+                    {% else %}
+                        <tr>
+                            <td colspan="5">-</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+
+            <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 20px;">
+                <label for="Va" style="margin-right: 10px;"><strong>#VA</strong></label>
+                
+                <select style="text-align: center; width: 20%; margin-right: 10px;" id="Va" name="Va">
+                    <option value="SAP" {% if request.args.get('Va') == 'SAP' %}selected{% endif %}>SAP</option>
+                    {% for versao in versoes %}
+                        <option value="{{ versao.Versao }}" {% if request.args.get('Va') == versao.Versao %}selected{% endif %}>
+                            {{ versao.Versao }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <label for="Vb" style="margin-right: 10px;"><strong>#VB</strong></label>
+                <select style="text-align: center; width: 20%; margin-right: 10px;" id="Vb" name="Vb">
+                    <option value="SAP" {% if request.args.get('Vb') == 'SAP' %}selected{% endif %}>SAP</option>
+                    {% for versao in versoes %}
+                        <option value="{{ versao.Versao }}" {% if request.args.get('Vb') == versao.Versao %}selected{% endif %}>
+                            {{ versao.Versao }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+            
+                <button class="btn btn-outline-info" type="submit">Comparar</button>
+            </div>
+            
+
+        </form>
+        
+
+        <div class="table-container">
+            <table style="text-align: center;" class="table-bordered">
+                <thead>
+                    <tr>
+                        <td colspan="3"><strong>{{ placa }} - {{ Va }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th width="100">Componente</th>
+                        <th width="100">Descrição</th>
+                        <th width="100">Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in diferencas.exclusivos_em_BOMs %}
+                        <tr>
+                            <td>{{ item.componente }}</td>
+                            <td>{{ item.descricao }}</td>
+                            <td>{{ item.quantidade }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">Nenhum componente exclusivo encontrado.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <table style="text-align: center;" class="table-bordered">
+                <thead>
+                    <tr>
+                        <td colspan="3"><strong>{{ placa }} - {{ Vb }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th width="100">Componente</th>
+                        <th width="100">Descrição</th>
+                        <th width="100">Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in diferencas.exclusivos_em_BOMs_SAP %}
+                        <tr>
+                            <td>{{ item.componente }}</td>
+                            <td>{{ item.descricao }}</td>
+                            <td>{{ item.quantidade }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">Nenhum componente exclusivo encontrado.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <table style="text-align: center; width: 100%; margin-top: 20px;" class="table-bordered">
+            <thead>
+                <td colspan="4"><strong>Diferença de Quantidade</strong></td>
+                <tr>
+                    <th width="150">Componente</th>
+                    <th width="150">Descrição</th>
+                    <th width="180">Quantidade {{ Va }}</th>
+                    <th width="180">Quantidade {{ Vb }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in diferencas.comuns_com_diferencas %}
+                    <tr>
+                        <td>{{ item.componente }}</td>
+                        <td>{{ item.descricao }}</td>
+                        <td>{{ item.quantidade_BOMs }}</td>
+                        <td>{{ item.quantidade_BOMs_SAP }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">Nenhum componente comum com diferenças de quantidade encontrado.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- Menu e Flash -->
+    {% include 'menu.html' %}
+    <script src="../static/js_zaire/salvar_edit.js"></script>
+</body>
+</html>
