@@ -5,7 +5,7 @@ from datetime import datetime
 from io import BytesIO
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy import func
-from flask import Blueprint, request, render_template, redirect, flash, url_for, Response, session
+from flask import Blueprint, g, request, render_template, redirect, flash, url_for, Response, session
 from database.models.database_class import db, BOMs, BOMs_SAP, OITM, PNs, ALT, Data_Att, Versionamento
 
 # Implementar:
@@ -23,6 +23,8 @@ bp_BOM_route = Blueprint("BOM", __name__)
 
 @bp_BOM_route.before_request
 def require_login():
+    data_hora = Data_Att.query.first()
+    g.last_update = data_hora.last_update.strftime("%Y-%m-%d %H:%M:%S") if data_hora else None
     if 'username' not in session:
         return redirect(url_for('login.login', next=request.url))
 
@@ -168,9 +170,6 @@ def diff_SAP(placa, v_max, version_a, version_b):
 
 def lista_BOMs():
     try:
-        data_hora = Data_Att.query.first()
-        last_update = data_hora.last_update.strftime("%Y-%m-%d %H:%M:%S") if data_hora else None
-
         # Processa parâmetros de entrada
         placa = processa_parametro(request.args.get('placa', ''))
         versao = processa_parametro(request.args.get('versao', ''))
@@ -205,8 +204,7 @@ def lista_BOMs():
             versao=','.join(versao),
             status=','.join(status),
             componente=','.join(componente),
-            pagination=resultados,
-            last_update=last_update
+            pagination=resultados
         )
     except Exception as e:
         logger.error(f"Erro ao listar BOMs: {str(e)}")
