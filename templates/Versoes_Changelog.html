@@ -18,7 +18,7 @@
 </head>
 <body>
 
-    <div class="left-side-1">
+    <div class="caixa_full_tela">
         <!-- Formulário de filtro -->
         <div style="display: flex; justify-content: flex-end; align-items: center;">
             <form method="GET" action="{{ url_for('BOM.versoes') }}" style="display: flex; align-items: center; gap: 10px; width: 100%; max-width: 400px;">
@@ -29,25 +29,29 @@
                 <button type="submit" class="btn btn-outline-info">Filtrar</button>
             </form>
         </div>
+
+        {% if placa %}
+
         <!-- Tabela de Placa e Descrição -->
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-            <table class="table-bordered" style="text-align: center; border: 1px solid black; width: auto;">
-                <thead></thead>
-                <tbody>
-                    {% if versoes %}
-                        <tr>
-                            <td style="min-width: 150px; width: auto;">{{ versoes[0].Placa_V }}</td> <!-- Exibe a Placa com largura mínima e auto -->
-                            <td style="min-width: 400px; width: auto;">{{ versoes[0].Descricao }}</td> <!-- Exibe a Descrição com largura mínima e auto -->
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="2">-</td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <table class="table-bordered" style="text-align: center; border: 1px solid black; width: auto;">
+                    <thead></thead>
+                    <tbody>
+                        {% if versoes %}
+                            <tr>
+                                <td style="min-width: 150px; width: auto;">{{ versoes[0].Placa_V }}</td> <!-- Exibe a Placa com largura mínima e auto -->
+                                <td style="min-width: 400px; width: auto;">{{ versoes[0].Descricao }}</td> <!-- Exibe a Descrição com largura mínima e auto -->
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2">-</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
         
         <!-- Tabela de Versões -->
         <table style="text-align: center; border: 1px solid black; width: 100%; margin-top: 20px;">
@@ -79,7 +83,7 @@
                         <button type="button" class="btn btn-warning" style="font-size: 10px; padding: 0.5px 4px;" onclick="toggleEdit2('{{ versao.ID_V }}')">Editar</button>
                     </td>
 
-                    <!-- Botão X2 -->
+                    <!-- Botão X -->
                     <td>
                         <form action="{{ url_for('BOM.Exclui_Versao', bom_id=versao.ID_V) }}" method="POST">
                             <button type="submit" style="font-size: 10px; padding: 0.5px 4px" class="btn btn-danger"><strong>X</strong></button>
@@ -89,9 +93,9 @@
                     <!-- Versão -->
                     <td>
                         {% if versao.Versao == v_max %}
-                            {{ versao.Versao }} (SAP)
+                            V{{ versao.Versao }} (SAP)
                         {% else %}
-                            {{ versao.Versao }}
+                            V{{ versao.Versao }}
                         {% endif %}
                     </td>
 
@@ -194,19 +198,19 @@
             <table style="text-align: center;" class="table-bordered">
                 <thead>
                     <tr>
-                        <td colspan="3"><strong>{{ placa }} - {{ Va }}</strong></td>
+                        <td colspan="3"><strong>{{ placa }} - V{{ Va }}</strong></td>
                     </tr>
                     <tr>
-                        <th width="100">Componente</th>
-                        <th width="100">Descrição</th>
-                        <th width="100">Quantidade</th>
+                        <th width="10">Código</th>
+                        <th width="450">Descrição</th>
+                        <th width="10">Qtd</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in diferencas.exclusivos_em_BOMs %}
                         <tr>
                             <td>{{ item.componente }}</td>
-                            <td>{{ item.descricao }}</td>
+                            <td>{{ item.descricao|truncate(55)  }}</td>
                             <td>{{ item.quantidade }}</td>
                         </tr>
                     {% else %}
@@ -221,12 +225,12 @@
             <table style="text-align: center;" class="table-bordered">
                 <thead>
                     <tr>
-                        <td colspan="3"><strong>{{ placa }} - {{ Vb }}</strong></td>
+                        <td colspan="3"><strong>{{ placa }} - V{{ Vb }}</strong></td>
                     </tr>
                     <tr>
-                        <th width="100">Componente</th>
-                        <th width="100">Descrição</th>
-                        <th width="100">Quantidade</th>
+                        <th width="10">Código</th>
+                        <th width="450">Descrição</th>
+                        <th width="10">Qtd</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -250,10 +254,10 @@
             <thead>
                 <td colspan="4"><strong>Diferença de Quantidade</strong></td>
                 <tr>
-                    <th width="150">Componente</th>
-                    <th width="150">Descrição</th>
-                    <th width="180">Quantidade {{ Va }}</th>
-                    <th width="180">Quantidade {{ Vb }}</th>
+                    <th width="10">Componente</th>
+                    <th width="350">Descrição</th>
+                    <th width="30">Qtd V{{ Va }}</th>
+                    <th width="30">Qtd V{{ Vb }}</th>
                 </tr>
             </thead>
             <tbody>

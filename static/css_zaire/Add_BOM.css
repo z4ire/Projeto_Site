@@ -2,10 +2,10 @@
 
 
 /* Estilo da coluna à esquerda */
-.left-side-1 {
+.caixa_full_tela {
     position: absolute;
     top: 90px;    /* Ajuste a distância do topo */
-    left: 50px;  /* Ajuste a distância da direita */
+    left: 38px;  /* Ajuste a distância da direita */
     right: 50px;
     width: 95%;   /* Ajuste conforme necessário */
     padding-top: 25px;
@@ -17,8 +17,8 @@
     box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
 }
 
-.left-side-1 input, 
-.left-side-1 textarea {
+.caixa_full_tela input, 
+.caixa_full_tela textarea {
     width: 97%; /* Ajuste para reduzir o comprimento dos campos */
 }
 
@@ -39,7 +39,7 @@
 /* Estilo da coluna à esquerda */
 .right-side-1 {
     position: absolute;
-    top: 90px;    /* Ajuste a distância do topo */
+    top: 75px;    /* Ajuste a distância do topo */
     right: 50px;  /* Ajuste a distância da direita */
     width: 45%;   /* Ajuste conforme necessário */
     padding-top: 25px;
@@ -53,7 +53,7 @@
 /* Estilo da coluna à direita */
 .right-side-2 {
     position: absolute;
-    top: 310px;    /* Ajuste a distância do topo */
+    top: 300px;    /* Ajuste a distância do topo */
     right: 50px;  /* Ajuste a distância da direita */
     width: 45%;   /* Ajuste conforme necessário */
     background-color: #f4f4f4;

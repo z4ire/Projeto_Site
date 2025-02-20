@@ -1,12 +1,12 @@
 import pandas as pd
 import logging
+from functools import wraps
 from datetime import datetime
 from io import BytesIO
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy import func
-from flask import Blueprint, request, render_template, redirect, flash, url_for, Response
+from flask import Blueprint, request, render_template, redirect, flash, url_for, Response, session
 from database.models.database_class import db, BOMs, BOMs_SAP, OITM, PNs, ALT, Data_Att, Versionamento
-
 
 # Implementar:
 #     Tela de confirmação de exclusão de linha.
@@ -20,6 +20,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 bp_BOM_route = Blueprint("BOM", __name__)
+
+@bp_BOM_route.before_request
+def require_login():
+    if 'username' not in session:
+        return redirect(url_for('login.login', next=request.url))
 
 # Funções auxiliares
 def processa_parametro(parametro: str) -> list:
@@ -96,11 +101,9 @@ def verificar_e_inserir_versionamento(placa, versao):
         new_version = Versionamento(Placa_V=placa, Versao=versao, Data_Cri=datetime.now().strftime('%d/%m/%Y'), Data_Att=datetime.now().strftime('%d/%m/%Y'))
         db.session.add(new_version)
         db.session.commit()
-        flash('Dados carregados com sucesso.', 'success')
         return True  # Indica que uma nova versão foi inserida
     except IntegrityError:
         db.session.rollback()
-        flash('Já existe esta combinação de placa-versao.', 'success')
         return False  # Indica que a versão já existe
 
 def diff_SAP(placa, v_max, version_a, version_b):
@@ -162,6 +165,7 @@ def diff_SAP(placa, v_max, version_a, version_b):
     return diff
 
 @bp_BOM_route.route('/', methods=['GET'])
+
 def lista_BOMs():
     try:
         data_hora = Data_Att.query.first()
@@ -207,9 +211,9 @@ def lista_BOMs():
     except Exception as e:
         logger.error(f"Erro ao listar BOMs: {str(e)}")
         flash("Ocorreu um erro ao listar os BOMs. Tente novamente.", "error")
-        return redirect(url_for('BOM.lista_BOMs'))
+        return render_template('BOMs.html')
 
-@bp_BOM_route.route('/new', methods=['POST'])
+@bp_BOM_route.route('/add', methods=['POST', 'GET'])
 def add_BOMs():
 
     # Verifica se a requisição contém um arquivo (Excel)
@@ -235,9 +239,11 @@ def add_BOMs():
                 db.session.add(new_BOM)
             db.session.commit()
             flash('Dados carregados com sucesso.', 'success')
+            return render_template('add_bom.html')
         except Exception as e:
             db.session.rollback()  # Reverte em caso de erro
             flash(f'Ocorreu um erro ao processar o arquivo: {str(e)}', 'error')
+            return render_template('add_bom.html')
 
     else:  # Caso o formulário manual seja enviado
         # Obtém os dados do formulário
@@ -266,15 +272,14 @@ def add_BOMs():
                 # Adiciona o novo BOM ao banco de dados
                 db.session.add(new_BOM)
                 db.session.commit()
+                flash('Dados carregados com sucesso.', 'success')
                 
             else:  
                 flash('Nem todos os campos foram preenchidos', 'success')
-        else:
-            flash('Não é um xlsx', 'success')
 
-    return redirect(request.referrer or url_for('home'))
+    return render_template('add_bom.html')
 
-@bp_BOM_route.route('/new', methods=['GET'])
+@bp_BOM_route.route('/versoes', methods=['GET'])
 def versoes():
     """Lista as versões das placas cadastradas."""
     try:
@@ -302,17 +307,17 @@ def versoes():
 
         diff = diff_SAP(placa, v_max, Va, Vb)
 
-        return render_template('formulario_cadastro_BOM.html', versoes=resultados, placa=placa, diferencas=diff, v_max=v_max, Va=Va, Vb=Vb)
+        return render_template('Versoes_Changelog.html', versoes=resultados, placa=placa, diferencas=diff, v_max=v_max, Va=Va, Vb=Vb)
     
     except SQLAlchemyError as e:
         logger.error(f"Erro ao consultar versões: {str(e)}")
         flash("Ocorreu um erro ao consultar as versões. Tente novamente.", "error")
-        return redirect(url_for('BOM.lista_BOMs'))
+        return render_template('Versoes_Changelog.html')
     except Exception as e:
         logger.error(f"Erro inesperado ao consultar versões: {str(e)}")
         flash("Ocorreu um erro inesperado. Tente novamente.", "error")
         print("Mensagem de erro:", e)
-        return redirect(url_for('BOM.lista_BOMs'))
+        return render_template('Versoes_Changelog.html')
 
 @bp_BOM_route.route('/alt', methods=['GET'])
 def alternativos_BOM():
@@ -349,11 +354,11 @@ def alternativos_BOM():
     except SQLAlchemyError as e:
         logger.error(f"Erro ao consultar alternativos: {str(e)}")
         flash("Ocorreu um erro ao consultar os componentes alternativos. Tente novamente.", "error")
-        return redirect(url_for('BOM.lista_BOMs'))
+        return render_template('Alt.html')
     except Exception as e:
         logger.error(f"Erro inesperado ao consultar alternativos: {str(e)}")
         flash("Ocorreu um erro inesperado. Tente novamente.", "error")
-        return redirect(url_for('BOM.lista_BOMs'))
+        return render_template('Alt.html')
 
 @bp_BOM_route.route('/delete/linha/<bom_id>', methods=['POST'])
 def Exclui_Componente(bom_id):
@@ -466,43 +471,3 @@ def edit_versao_BOM(bom_id):
         logger.error(f"Erro ao editar BOM: {str(e)}")
         flash("Erro ao modificar o item. Tente novamente.", "error")
     return redirect(request.referrer or url_for('home'))
-
-@bp_BOM_route.route('/old', methods=['GET'])
-def versoes2():
-    """Lista as versões das placas cadastradas."""
-    try:
-
-        placa = processa_parametro(request.args.get('placa', ''))
-
-        # Verifica se a lista não está vazia antes de tentar acessar o primeiro item
-        if placa:
-            placa = placa[0]  # Acessa o primeiro item, se a lista não estiver vazia
-        else:
-            placa = ''  # Ou outro valor padrão, se a lista estiver vazia
-
-        # Executa a consulta
-        resultados = constroi_consulta_versoes(placa)
-
-        v_max = resultados[0].Versao if resultados else None
-
-        try:
-            Va = processa_parametro(request.args.get('Va', ''))[0]
-            Vb = processa_parametro(request.args.get('Vb', ''))[0]
-
-        except (IndexError, TypeError):
-            Va = v_max
-            Vb = v_max
-            
-        diff = diff_SAP(placa, v_max, Va, Vb)
-
-        return render_template('add_bom.html', versoes=resultados, placa=placa, diferencas=diff, v_max=v_max, Va=Va, Vb=Vb)
-    
-    except SQLAlchemyError as e:
-        logger.error(f"Erro ao consultar versões: {str(e)}")
-        flash("Ocorreu um erro ao consultar as versões. Tente novamente.", "error")
-        return redirect(url_for('BOM.lista_BOMs'))
-    except Exception as e:
-        logger.error(f"Erro inesperado ao consultar versões: {str(e)}")
-        flash("Ocorreu um erro inesperado. Tente novamente.", "error")
-        print("Mensagem de erro:", e)
-        return redirect(url_for('BOM.lista_BOMs'))

@@ -1,4 +1,4 @@
-from routes.home import bp_home_route
+from routes.login import  bp_login_route
 from routes.BOM import bp_BOM_route
 from flask import Flask
 from config import Config
@@ -7,7 +7,7 @@ from database.models.database_class import db
 # Criação da instância da aplicação Flask
 app = Flask(__name__)
 app.config.from_object(Config)
-app.register_blueprint(bp_home_route)
+app.register_blueprint(bp_login_route)
 app.register_blueprint(bp_BOM_route, url_prefix = '/BOMs')
 app.secret_key = 'apppadtec'
 
